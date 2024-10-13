@@ -1,5 +1,5 @@
 import pytest
-from fps.fps_parser import *
+from what_not_how.dsl_parser import *
 
 
 def _build(inputs, expected):

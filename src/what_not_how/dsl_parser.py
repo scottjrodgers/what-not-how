@@ -171,7 +171,7 @@ def make_rule(predicate, action) -> Dict:
 # ------------------------------------------------------
 #   Parsing Rule Actions
 # ------------------------------------------------------
-def group_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def group_action(tokens: List[str], node, _context, lines: List[str], line_no: int, this_indent: int):
     # this line is defining a new Model Group
     n_tokens = len(tokens)
     tok1 = tokens[1]
@@ -185,13 +185,13 @@ def group_action(tokens: List[str], node, lines: List[str], line_no: int, this_i
             while identifier in node.groups:
                 identifier += "'"
 
-        new_group = ModelGroup(identifier)
+        new_group = ModelGroup(identifier, parent=node)
         node.groups[identifier] = new_group
-        return parse_group(lines, new_group, line_no + 1, this_indent)
+        return parse_group(lines, new_group, new_group, line_no + 1, this_indent)
     return line_no + 1
 
 
-def data_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def data_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
     # this line is defining a new Data Object
     n_tokens = len(tokens)
     tok1 = tokens[1]
@@ -205,13 +205,13 @@ def data_action(tokens: List[str], node, lines: List[str], line_no: int, this_in
             while identifier in node.data_objects:
                 identifier += "'"
 
-        new_data = DataObject(kind=tok1.upper, name=identifier)
+        new_data = DataObject(kind=tok1.upper, name=identifier, parent=node)
         node.data_objects[identifier] = new_data
-        return parse_data(lines, new_data, line_no + 1, this_indent)
+        return parse_data(lines, new_data, context, line_no + 1, this_indent)
     return line_no + 1
 
 
-def process_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def process_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
     # this line is defining a new Process
     n_tokens = len(tokens)
     tok1 = tokens[1]
@@ -225,9 +225,9 @@ def process_action(tokens: List[str], node, lines: List[str], line_no: int, this
             while identifier in node.processes:
                 identifier += "'"
 
-        new_process = Process(name=identifier)
+        new_process = Process(name=identifier, parent=node)
         node.processes[identifier] = new_process
-        return parse_process(lines, new_process, line_no + 1, this_indent)
+        return parse_process(lines, new_process, context, line_no + 1, this_indent)
     return line_no + 1
 
 
@@ -246,7 +246,7 @@ def find_or_create_data_object(context, identifier: str) -> bool:
     return False
 
 
-def id_list_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
     # this line is defining a new ID List
     n_tokens = len(tokens)
     tok1 = tokens[1]
@@ -273,7 +273,7 @@ def id_list_action(tokens: List[str], node, lines: List[str], line_no: int, this
             # check if identifier exists in this structure's parent scope.  Continue to check parents
             # until the identifier is found, or there are no more parents.  Node is the process,
             # node's parent is the group / namespace where the process is defined.
-            find_or_create_data_object(node.parent, identifier)
+            find_or_create_data_object(context, identifier)
 
             t_idx += 1
             if t_idx < n_tokens:
@@ -282,11 +282,11 @@ def id_list_action(tokens: List[str], node, lines: List[str], line_no: int, this
                                "separated by commas", lines[line_no], line_no):
                     break
             t_idx += 1
-        return parse_id_list(lines, new_list, line_no + 1, this_indent)
+        return parse_id_list(lines, new_list, context, line_no + 1, this_indent)
     return line_no + 1
 
 
-def str_list_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def str_list_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
     # this line is defining a new String List
     n_tokens = len(tokens)
     tok1 = tokens[1]
@@ -307,11 +307,11 @@ def str_list_action(tokens: List[str], node, lines: List[str], line_no: int, thi
         if n_tokens > 3:
             new_list.append(tokens[3])
 
-        return parse_str_list(lines, new_list, line_no + 1, this_indent)
+        return parse_str_list(lines, new_list, context, line_no + 1, this_indent)
     return line_no + 1
 
 
-def identifiers_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def identifiers_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
     # this line is with one or more identifiers
     n_tokens = len(tokens)
     t_idx = 1
@@ -321,7 +321,7 @@ def identifiers_action(tokens: List[str], node, lines: List[str], line_no: int, 
         node.append(identifier)
 
         # same as in id_list_action
-        find_or_create_data_object(node.parent, identifier)
+        find_or_create_data_object(context, identifier)
 
         t_idx += 1
         if t_idx < n_tokens:
@@ -334,7 +334,7 @@ def identifiers_action(tokens: List[str], node, lines: List[str], line_no: int, 
     return line_no + 1
 
 
-def unquoted_string_action(tokens: List[str], node, lines: List[str], line_no: int, this_indent: int):
+def unquoted_string_action(tokens: List[str], node, _context, lines: List[str], line_no: int, this_indent: int):
     # this line is a single unquoted string
     n_tokens = len(tokens)
     error_check(n_tokens > 2,"This line should have a single, unquoted string",
@@ -346,7 +346,7 @@ def unquoted_string_action(tokens: List[str], node, lines: List[str], line_no: i
 # ------------------------------------------------------
 #   Central Parsing Functions
 # ------------------------------------------------------
-def __parse_block(lines: List[str], node, start_line: int, start_indent: int, rules: List[Dict]):
+def __parse_block(lines: List[str], node, context, start_line: int, start_indent: int, rules: List[Dict]):
     """
     We're parsing a sequence of lines from a model definition file, knowing that our current
     context is that we're in a ModelGroup node.  From this level, our children structures
@@ -398,7 +398,7 @@ def __parse_block(lines: List[str], node, start_line: int, start_indent: int, ru
         for rule in rules:
             if rule['predicate'](tokens[1]):
                 matched = True
-                line_no = rule['action'](tokens, node, lines, line_no, this_indent)
+                line_no = rule['action'](tokens, node, context, lines, line_no, this_indent)
                 break
         if not matched:
             print(f"Could not match line {line_no}: {lines[line_no]}")
@@ -453,24 +453,24 @@ str_list_rules = [
 #   Specific parsing functions, implemented with the general parse_block function
 #   and specific rule sets for the different contexts
 # ---------------------------------------------------------------------------------
-def parse_group(lines: List[str], node, start_line: int = 0, start_indent: int = -1):
-    return __parse_block(lines, node, start_line, start_indent, group_rules)
+def parse_group(lines: List[str], node, context, start_line: int = 0, start_indent: int = -1):
+    return __parse_block(lines, node, context, start_line, start_indent, group_rules)
 
 
-def parse_process(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, process_rules)
+def parse_process(lines: List[str], node, context, start_line: int, start_indent: int):
+    return __parse_block(lines, node, context, start_line, start_indent, process_rules)
 
 
-def parse_data(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, data_rules)
+def parse_data(lines: List[str], node, context, start_line: int, start_indent: int):
+    return __parse_block(lines, node, context, start_line, start_indent, data_rules)
 
 
-def parse_id_list(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, id_list_rules)
+def parse_id_list(lines: List[str], node, context, start_line: int, start_indent: int):
+    return __parse_block(lines, node, context, start_line, start_indent, id_list_rules)
 
 
-def parse_str_list(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, str_list_rules)
+def parse_str_list(lines: List[str], node, context, start_line: int, start_indent: int):
+    return __parse_block(lines, node, context, start_line, start_indent, str_list_rules)
 
 
 # ------------------------------------------------------
@@ -505,7 +505,7 @@ def parse_model(fname: Optional[str] = None, lines: Optional[List[str]] = None):
     #     print(f"{i+1:2d}: {line}")
 
     model = ModelGroup(None)
-    parse_group(lines, model, 0, -1)
+    parse_group(no_cr_lines, model, model,0, -1)
 
     return model, error_list
 
@@ -515,5 +515,6 @@ if __name__ == '__main__':
     # mdl, err_list = parse_model(fname='../../example_process.fps')
     # mdl, err_list = parse_model(fname='../../example_2.fps')
     # mdl, err_list = parse_model(fname='../../sample_documents/what_not_how.what')
-    mdl, err_list = parse_model(fname='../../sample_documents/ns.what')
+    # mdl, err_list = parse_model(fname='../../sample_documents/ns.what')
+    mdl, err_list = parse_model(fname='../../sample_documents/simple_test.what')
     print("Boom! done.")

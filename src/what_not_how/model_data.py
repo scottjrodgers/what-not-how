@@ -2,7 +2,7 @@ _next_unique_id: int = 1
 
 
 class ModelGroup:
-    def __init__(self, name=None):
+    def __init__(self, name=None, parent=None):
         global _next_unique_id
         self.uid = _next_unique_id
         _next_unique_id += 1
@@ -11,11 +11,11 @@ class ModelGroup:
         self.processes = {}
         self.data_objects = {}
         self.groups = {}
-        self.parent = None
+        self.parent = parent
 
 
 class Process:
-    def __init__(self, name=None):
+    def __init__(self, name=None, parent=None):
         global _next_unique_id
         self.uid = _next_unique_id
         _next_unique_id += 1
@@ -24,11 +24,11 @@ class Process:
         # self.inputs = []
         # self.outputs = []
         self.lists = {}
-        self.parent = None
+        self.parent = parent
 
 
 class DataObject:
-    def __init__(self, kind, name=None):
+    def __init__(self, kind, name=None, parent=None):
         global _next_unique_id
         self.uid = _next_unique_id
         _next_unique_id += 1
@@ -36,7 +36,7 @@ class DataObject:
         self.name = name
         self.kind = kind
         self.lists = {}
-        self.parent = None
+        self.parent = parent
 
 
 class DataIdentifier:
@@ -47,7 +47,6 @@ class DataIdentifier:
 
         self.name = name
         self.optional = optional
-        self.parent = None
 
     def __repr__(self):
         val = f"{self.name}"

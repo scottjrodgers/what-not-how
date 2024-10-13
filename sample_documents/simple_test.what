@@ -1,0 +1,18 @@
+data X
+data W
+concept U
+process A:
+    input: X
+    output: W
+        U
+file C:
+    notes: notes on same line
+data D:
+    notes:
+        note 1
+        note 2
+# skip this comment
+process B: extraneous
+    input: C, E
+    output: D
+        F,G, H
