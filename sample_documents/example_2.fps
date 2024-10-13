@@ -1,0 +1,7 @@
+process A: extra
+    input: X
+    output: W
+        U
+process B:
+    input: C
+    output: D
