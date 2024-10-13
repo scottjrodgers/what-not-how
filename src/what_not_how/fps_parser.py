@@ -1,5 +1,5 @@
 from typing import Tuple, List, Dict, Optional
-from fps.model_data import Process, DataObject, ModelGroup, DataIdentifier
+from what_not_how.model_data import Process, DataObject, ModelGroup, DataIdentifier
 
 # ------------------------------------------------------
 #   Language definitions
@@ -18,13 +18,6 @@ str_list_kw = ['note', 'notes',
                'pre-conditions', 'pre-condition',
                'post-conditions', 'post-condition',
                ]
-
-
-# class PToken:
-#     def __init__(self, text, line, column):
-#         self.text = text
-#         self.line = line
-#         self.column = column
 
 
 # ------------------------------------------------------
@@ -381,53 +374,64 @@ def __parse_block(lines: List[str], node, start_line: int, start_indent: int, ru
     return line_no
 
 
+group_rules = [
+    make_rule(
+        predicate=keywords_predicate(group_kw),
+        action=group_action),
+    make_rule(
+        predicate=keywords_predicate(data_kw),
+        action=data_action),
+    make_rule(
+        predicate=keywords_predicate(process_kw),
+        action=process_action),
+]
+
+process_rules = [
+    make_rule(
+        predicate=keywords_predicate(id_list_kw),
+        action=id_list_action),
+    make_rule(
+        predicate=keywords_predicate(str_list_kw),
+        action=str_list_action),
+]
+
+data_rules = [
+    make_rule(
+        predicate=keywords_predicate(str_list_kw),
+        action=str_list_action),
+]
+
+id_list_rules = [
+    make_rule(
+        predicate=always_predicate,
+        action=identifiers_action),
+]
+
+str_list_rules = [
+    make_rule(
+        predicate=always_predicate,
+        action=unquoted_string_action),
+]
+
+
 def parse_group(lines: List[str], node, start_line: int = 0, start_indent: int = -1):
-    return __parse_block(lines, node, start_line, start_indent, [
-                             make_rule(
-                                 predicate=keywords_predicate(group_kw),
-                                 action=group_action),
-                             make_rule(
-                                 predicate=keywords_predicate(data_kw),
-                                 action=data_action),
-                             make_rule(
-                                 predicate=keywords_predicate(process_kw),
-                                 action=process_action),
-    ])
+    return __parse_block(lines, node, start_line, start_indent, group_rules)
 
 
 def parse_process(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, [
-                             make_rule(
-                                 predicate=keywords_predicate(id_list_kw),
-                                 action=id_list_action),
-                             make_rule(
-                                 predicate=keywords_predicate(str_list_kw),
-                                 action=str_list_action),
-    ])
+    return __parse_block(lines, node, start_line, start_indent, process_rules)
 
 
 def parse_data(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, [
-                             make_rule(
-                                 predicate=keywords_predicate(str_list_kw),
-                                 action=str_list_action),
-    ])
+    return __parse_block(lines, node, start_line, start_indent, data_rules)
 
 
 def parse_id_list(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, [
-                             make_rule(
-                                 predicate=always_predicate,
-                                 action=identifiers_action),
-    ])
+    return __parse_block(lines, node, start_line, start_indent, id_list_rules)
 
 
 def parse_str_list(lines: List[str], node, start_line: int, start_indent: int):
-    return __parse_block(lines, node, start_line, start_indent, [
-                             make_rule(
-                                 predicate=always_predicate,
-                                 action=unquoted_string_action),
-    ])
+    return __parse_block(lines, node, start_line, start_indent, str_list_rules)
 
 
 def parse_model(fname: Optional[str] = None, lines: Optional[List[str]] = None):
