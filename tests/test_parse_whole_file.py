@@ -1,6 +1,6 @@
 # import pytest
 from typing import List
-from fps.fps_parser import parse_model
+from what_not_how.dsl_parser import parse_model
 
 
 input_file = """
