@@ -1,0 +1,44 @@
+#-----------------------------------------
+# Data Objects:
+#-----------------------------------------
+file Opt_MRD
+data Optimal_DV_Values
+data Constraint_Relaxation_Info
+data MIP_Error_List
+data Gurobi_Model:
+    notes:
+        Model object containing the objective function, variable definitions (types, bounds),
+        and constraints - including intermediate variables as necessary
+
+#-----------------------------------------
+# Process Definitions
+#-----------------------------------------
+process SolveGurobiModel:
+    notes: Solve a Mixed-Integer Programming model using Gurobi
+    output:
+        Optimal_DV_Values
+        [Constraint_Relaxation_Info]
+        [MIP_Error_List]
+    input:
+        Gurobi_Model
+
+
+process BuildGurobiModel:
+    output:
+        Gurobi_Model
+    input:
+        Objective_Function_Info
+        Variable_Definition_Info
+        Constraint_Info
+
+
+process BuildObjectiveFunction:
+    output:
+        Objective_Function_Info
+    input:
+        Model-ID-List
+        KPI_by_Model_ID
+        KPI-Level-Weights
+    notes:
+        maximize Weight(margin) * sum(...) - need to think about this more
+
