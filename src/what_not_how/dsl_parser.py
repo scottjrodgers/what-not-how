@@ -231,19 +231,19 @@ def process_action(tokens: List[str], node, context, lines: List[str], line_no: 
     return line_no + 1
 
 
-def find_or_create_data_object(context, identifier: str) -> bool:
+def find_or_create_data_object(context, identifier: str) -> DataObject:
     if identifier in context.data_objects:
-        return True
+        return context.data_objects[identifier]
     cur_context = context
     while cur_context.parent is not None:
         if identifier in cur_context.data_objects:
-            return True
+            return context.data_objects[identifier]
         cur_context = cur_context.parent
 
     # create an "undefined" type identifier
     undefined_data = DataObject(kind='UNDEFINED', name=identifier)
     context.data_objects[identifier] = undefined_data
-    return False
+    return undefined_data
 
 
 def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
@@ -265,15 +265,19 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
         node.lists[list_name] = new_list
 
         t_idx = 3
+        # check for identifier tokens after the colon
         while t_idx < n_tokens:
-            # identifier tokens after the colon
-            identifier = tokens[t_idx]
-            new_list.append(identifier)
+            identifier_text = tokens[t_idx]
+            assert len(identifier_text) > 0
+            if identifier_text[0] == '[' and identifier_text[-1] == ']':
+                identifier = identifier_text[1: -1]
+                optional = True
+            else:
+                identifier = identifier_text
+                optional = False
 
-            # check if identifier exists in this structure's parent scope.  Continue to check parents
-            # until the identifier is found, or there are no more parents.  Node is the process,
-            # node's parent is the group / namespace where the process is defined.
-            find_or_create_data_object(context, identifier)
+            data_obj: DataObject = find_or_create_data_object(context, identifier)
+            new_list.append(DataIdentifier(identifier, data_obj.uid, optional))
 
             t_idx += 1
             if t_idx < n_tokens:
@@ -315,13 +319,21 @@ def identifiers_action(tokens: List[str], node, context, lines: List[str], line_
     # this line is with one or more identifiers
     n_tokens = len(tokens)
     t_idx = 1
-    while t_idx < n_tokens:
-        # identifier tokens after the colon
-        identifier = tokens[t_idx]
-        node.append(identifier)
 
-        # same as in id_list_action
-        find_or_create_data_object(context, identifier)
+    # identifier tokens after the colon
+    while t_idx < n_tokens:
+        identifier_text = tokens[t_idx]
+        assert len(identifier_text) > 0
+
+        if identifier_text[0] == '[' and identifier_text[-1] == ']':
+            identifier = identifier_text[1: -1]
+            optional = True
+        else:
+            identifier = identifier_text
+            optional = False
+
+        data_obj: DataObject = find_or_create_data_object(context, identifier)
+        node.append(DataIdentifier(identifier, data_obj.uid, optional))
 
         t_idx += 1
         if t_idx < n_tokens:
@@ -510,11 +522,4 @@ def parse_model(fname: Optional[str] = None, lines: Optional[List[str]] = None):
     return model, error_list
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    # mdl, err_list = parse_model(fname='../../example_process.fps')
-    # mdl, err_list = parse_model(fname='../../example_2.fps')
-    # mdl, err_list = parse_model(fname='../../sample_documents/what_not_how.what')
-    # mdl, err_list = parse_model(fname='../../sample_documents/ns.what')
-    mdl, err_list = parse_model(fname='../../sample_documents/simple_test.what')
-    print("Boom! done.")
+
