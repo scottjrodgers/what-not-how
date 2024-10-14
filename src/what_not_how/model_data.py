@@ -40,11 +40,8 @@ class DataObject:
 
 
 class DataIdentifier:
-    def __init__(self, name, optional=False):
-        global _next_unique_id
-        self.uid = _next_unique_id
-        _next_unique_id += 1
-
+    def __init__(self, name: str, uid: int, optional=False):
+        self.identifier_id = uid
         self.name = name
         self.optional = optional
 
