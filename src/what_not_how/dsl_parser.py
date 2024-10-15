@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict, Optional
+from typing import List, Dict, Optional
 from what_not_how.model_data import Process, DataObject, ModelGroup, DataIdentifier
 
 
@@ -19,24 +19,34 @@ str_list_kw = ['note', 'notes',
                'pre-conditions', 'pre-condition',
                'post-conditions', 'post-condition',
                ]
-list_name_mapping = {
-    'input': 'inputs',
-    'inputs': 'inputs',
-    'in': 'inputs',
-    'output': 'outputs',
-    'outputs': 'outputs',
-    'out': 'outputs',
-    'note': 'notes',
-    'notes': 'notes',
-    'description': 'description',
-    'desc': 'description',
-    'descr': 'description',
-    'assumptions': 'assumptions',
-    'pre-conditions': 'pre-conditions',
-    'pre-condition': 'pre-conditions',
-    'post-conditions': 'post-conditions',
-    'post-condition': 'post-conditions',
-}
+
+input_kw = ['in', 'input', 'inputs']
+output_kw = ['out', 'output', 'outputs']
+notes_kw = ['note', 'notes']
+assumption_kw = ['assumptions']
+pre_cond_kw = ['preconditions', 'pre-conditions']
+post_cond_kw = ['postconditions', 'post-conditions']
+# fields_kw = ['fields', 'columns']
+
+
+# list_name_mapping = {
+#     'input': 'inputs',
+#     'inputs': 'inputs',
+#     'in': 'inputs',
+#     'output': 'outputs',
+#     'outputs': 'outputs',
+#     'out': 'outputs',
+#     'note': 'notes',
+#     'notes': 'notes',
+#     'description': 'description',
+#     'desc': 'description',
+#     'descr': 'description',
+#     'assumptions': 'assumptions',
+#     'pre-conditions': 'pre-conditions',
+#     'pre-condition': 'pre-conditions',
+#     'post-conditions': 'post-conditions',
+#     'post-condition': 'post-conditions',
+# }
 
 # ------------------------------------------------------
 #   Error handling
@@ -271,16 +281,16 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
                     f"A line starting with '{tok1}' should be followed by an identifier and colon",
                     lines[line_no], line_no):
         list_name = tokens[1]
-        assert list_name in list_name_mapping, "unexpected list name"
-        list_name = list_name_mapping[list_name]
-
-        error_check(list_name in node.lists,
-                    f"ID List '{list_name}' is already defined in the current structure.",
-                    lines[line_no], line_no)
 
         # if a list was already defined, use it -- even though that is unexpected
-        new_list = node.lists.get(list_name, [])
-        node.lists[list_name] = new_list
+        if list_name in input_kw:
+            target_list = node.inputs
+        elif list_name in output_kw:
+            target_list = node.outputs
+        else:
+            error_check(True, "Unknown id_list_type",
+                        lines[line_no], line_no)
+            target_list = []
 
         t_idx = 3
         # check for identifier tokens after the colon
@@ -295,7 +305,7 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
                 optional = False
 
             data_obj: DataObject = find_or_create_data_object(context, identifier)
-            new_list.append(DataIdentifier(identifier, data_obj.uid, optional))
+            target_list.append(DataIdentifier(identifier, data_obj.uid, optional))
 
             t_idx += 1
             if t_idx < n_tokens:
@@ -304,7 +314,7 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
                                "separated by commas", lines[line_no], line_no):
                     break
             t_idx += 1
-        return parse_id_list(lines, new_list, context, line_no + 1, this_indent)
+        return parse_id_list(lines, target_list, context, line_no + 1, this_indent)
     return line_no + 1
 
 
@@ -316,20 +326,25 @@ def str_list_action(tokens: List[str], node, context, lines: List[str], line_no:
                     f"A line starting with '{tok1}' should be followed by an identifier and colon",
                     lines[line_no], line_no):
         list_name = tokens[1]
-        assert list_name in list_name_mapping, "unexpected list name"
-        list_name = list_name_mapping[list_name]
 
-        error_check(list_name in node.lists,
-                    f"String List '{list_name}' is already defined in the current structure.",
-                    lines[line_no], line_no)
-
-        new_list = node.lists.get(list_name, [])
-        node.lists[list_name] = new_list
+        # if a list was already defined, use it -- even though that is unexpected
+        if list_name in notes_kw:
+            target_list = node.notes
+        elif list_name in assumption_kw:
+            target_list = node.assumptions
+        elif list_name in pre_cond_kw:
+            target_list = node.preconditions
+        elif list_name in post_cond_kw:
+            target_list = node.postconditions
+        else:
+            error_check(True, "Unknown str_list_type",
+                        lines[line_no], line_no)
+            target_list = []
 
         if n_tokens > 3:
-            new_list.append(tokens[3])
+            target_list.append(tokens[3])
 
-        return parse_str_list(lines, new_list, context, line_no + 1, this_indent)
+        return parse_str_list(lines, target_list, context, line_no + 1, this_indent)
     return line_no + 1
 
 
