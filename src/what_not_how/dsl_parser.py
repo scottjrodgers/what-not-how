@@ -29,25 +29,6 @@ post_cond_kw = ['postconditions', 'post-conditions']
 # fields_kw = ['fields', 'columns']
 
 
-# list_name_mapping = {
-#     'input': 'inputs',
-#     'inputs': 'inputs',
-#     'in': 'inputs',
-#     'output': 'outputs',
-#     'outputs': 'outputs',
-#     'out': 'outputs',
-#     'note': 'notes',
-#     'notes': 'notes',
-#     'description': 'description',
-#     'desc': 'description',
-#     'descr': 'description',
-#     'assumptions': 'assumptions',
-#     'pre-conditions': 'pre-conditions',
-#     'pre-condition': 'pre-conditions',
-#     'post-conditions': 'post-conditions',
-#     'post-condition': 'post-conditions',
-# }
-
 # ------------------------------------------------------
 #   Error handling
 # ------------------------------------------------------
@@ -71,6 +52,7 @@ def error_check(condition, message, line, line_no, col_no=None):
     if condition:
         error = ErrorData(message, line.strip(), line_no, col_no)
         error_list.append(error)
+        print(format_error(error))
     return condition
 
 

@@ -1,0 +1,61 @@
+options:
+    tool: mermaid
+    title: Example 3
+    filename: exp3
+    svg-name: exp3_diagram
+    recurse: true
+    flatten: false
+
+# top-level data definitions
+data A
+data B
+data C:
+    stackable: true
+data X
+data Y
+
+process PrA
+    desc: Process A
+    in: A, B, C+
+    out: X, Y?
+
+group Group1
+    implements: PrA
+
+    data D, E, F, G, H, I, J, K, L, M
+
+    process p1:
+        desc: Process 1
+        in: B, C+
+        out: D, E+
+
+    process p2:
+        desc: Process 2
+        in: B, C+
+        out: F, G+, H?
+
+    process p3:
+        desc: Process 3
+        in: A, B, C+
+        out: I, J?
+
+    process p4:
+        desc: Process 4
+        in: D, F
+        out: K
+
+    process p5:
+        desc: Process 5
+        stackable: true
+        in: E, G
+        out: L, M?
+
+    process p6:
+        desc: Process 6
+        in: M?, H?, J?
+        output: Y?
+
+    process p7:
+        desc: Process 7
+        in: K, L+
+        out: X
