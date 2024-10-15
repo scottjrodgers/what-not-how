@@ -21,9 +21,11 @@ class Process:
         _next_unique_id += 1
 
         self.name = name
-        # self.inputs = []
-        # self.outputs = []
-        self.lists = {}
+        self.inputs = []
+        self.outputs = []
+        self.notes = []
+        self.pre_conditions = []
+        self.post_conditions = []
         self.parent = parent
 
 
@@ -35,7 +37,9 @@ class DataObject:
 
         self.name = name
         self.kind = kind
-        self.lists = {}
+        self.notes = []
+        self.assumptions = []
+        self.fields = []
         self.parent = parent
 
 

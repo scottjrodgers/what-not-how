@@ -73,13 +73,12 @@ def build_data_flow_graph(mdl: ModelGroup):
         # step two: Extract and print out the information for each edge
         for p in mdl.processes.values():
             process_id = f"P{p.uid}"
-            for list_name in ['inputs', 'outputs']:
-                if list_name in p.lists:
-                    for di in p.lists[list_name]:
-                        data_id = f"D{di.identifier_id}"
-                        if list_name == 'inputs':
-                            s = f"{data_id}-->{process_id}"
-                        else:
-                            s = f"{process_id}-->{data_id}"
-                        f.write("    " + s + "\n")
-                        print(s)
+            for a_list, is_input in [(p.inputs, True), (p.outputs, False)]:
+                for di in a_list:
+                    data_id = f"D{di.identifier_id}"
+                    if is_input:
+                        s = f"{data_id}-->{process_id}"
+                    else:
+                        s = f"{process_id}-->{data_id}"
+                    f.write("    " + s + "\n")
+                    print(s)
