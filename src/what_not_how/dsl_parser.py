@@ -19,7 +19,24 @@ str_list_kw = ['note', 'notes',
                'pre-conditions', 'pre-condition',
                'post-conditions', 'post-condition',
                ]
-
+list_name_mapping = {
+    'input': 'inputs',
+    'inputs': 'inputs',
+    'in': 'inputs',
+    'output': 'outputs',
+    'outputs': 'outputs',
+    'out': 'outputs',
+    'note': 'notes',
+    'notes': 'notes',
+    'description': 'description',
+    'desc': 'description',
+    'descr': 'description',
+    'assumptions': 'assumptions',
+    'pre-conditions': 'pre-conditions',
+    'pre-condition': 'pre-conditions',
+    'post-conditions': 'post-conditions',
+    'post-condition': 'post-conditions',
+}
 
 # ------------------------------------------------------
 #   Error handling
@@ -254,14 +271,15 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
                     f"A line starting with '{tok1}' should be followed by an identifier and colon",
                     lines[line_no], line_no):
         list_name = tokens[1]
+        assert list_name in list_name_mapping, "unexpected list name"
+        list_name = list_name_mapping[list_name]
 
-        if error_check(list_name in node.lists,
-                       f"ID List '{list_name}' is already defined in the current structure.",
-                       lines[line_no], line_no):
-            while list_name in node.lists:
-                list_name += "'"
+        error_check(list_name in node.lists,
+                    f"ID List '{list_name}' is already defined in the current structure.",
+                    lines[line_no], line_no)
 
-        new_list = []
+        # if a list was already defined, use it -- even though that is unexpected
+        new_list = node.lists.get(list_name, [])
         node.lists[list_name] = new_list
 
         t_idx = 3
@@ -298,14 +316,14 @@ def str_list_action(tokens: List[str], node, context, lines: List[str], line_no:
                     f"A line starting with '{tok1}' should be followed by an identifier and colon",
                     lines[line_no], line_no):
         list_name = tokens[1]
+        assert list_name in list_name_mapping, "unexpected list name"
+        list_name = list_name_mapping[list_name]
 
-        if error_check(list_name in node.lists,
-                       f"String List '{list_name}' is already defined in the current structure.",
-                       lines[line_no], line_no):
-            while list_name in node.lists:
-                list_name += "'"
+        error_check(list_name in node.lists,
+                    f"String List '{list_name}' is already defined in the current structure.",
+                    lines[line_no], line_no)
 
-        new_list = []
+        new_list = node.lists.get(list_name, [])
         node.lists[list_name] = new_list
 
         if n_tokens > 3:
