@@ -1,0 +1,132 @@
+# https://packaging.python.org/en/latest/specifications/binary-distribution-format
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-git-versioning<2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "what-not-how"
+authors = [{name="Scott J. Rodgers", email="scott.j.rodgers@gmail.com"}, ]
+description = "A DSL and tools supporting the capturing of the intent of a system or process" # TODO UPDATE this
+requires-python = ">=3.10"
+
+[tools.setuptools]
+package-dir = {"" = "src"}
+
+[tools.setuptools.dynamic]
+dependencies = {file = ["requirements/base.txt"]}
+
+[tools.setuptools-git-versioning]
+enabled = true
+
+[tools.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = true
+ignore-module = true
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-nested-functions = false
+ignore-nested-classes = false
+ignore-setters = false
+fail-under = 55  # Or 85?
+exclude = ["docs", "build", "tests", "sample_documents"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+
+#possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 0
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = []
+generate_badge = "."
+badge-format = "svg"
+
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.coverage.run]
+branch = true
+source = "src"
+relative_files = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+
+[tool.ruff]
+# https://beta.ruff.rs/docs/settings/
+# https://beta.ruff.rs/docs/rules
+select = [
+    # to be added based on ConCon Optimizer
+
+    # baseline rules
+    "F",    # Pyflakes
+    "E",    # pycodestyle
+    "W",    # pycodestyle
+    "C90",  # mccabe
+    "I",    # isort
+
+    # generally useful rules
+    "N",    # pep8-naming
+    "A",    # flake8-builtins
+    "DTZ",  # flake8-datetimz
+    "G",    # flake8-logging-format
+    "PIE",  # flake8-pie
+    "RET",  # flake8-return
+    "SIM",  # flake8-simplify
+    "ARG",  # flake8-unused-arguments
+    "PLR",  # pylint refactor
+    "RUF",  # Ruff-specific rules
+    "ICN",  # flake8-import-conventions
+    "PT",   # flake8-pytest-style
+    "S",    # flake8-bandit
+    "C4",   # flake8-comprehensions
+
+    # things to consider
+    # "B",      # flake8-bugbear
+    # "ERA",    # eradicate
+    # "D",      # pydocstyle
+    # "PD",     # panda-vet
+    # "ANN",    # flake8-annotations
+    # "PTH",    # flake8-use-pathlib
+]
+unfixable = [
+    # This is things that we don't want ruff to fix automatically
+    # it will still flag the, but given the nature of the error, tye are ones
+    # where it is better to have a person reviewing the changes
+    "F841", # local variable is assigned but never used
+    "ERA",  # you should have to review code
+    "PD",   # do not autofix pandas
+    "SIM",  # do not autofix simplifications to code
+]
+ignore = [
+    "E501", # line length
+    "S101", # Use of 'assert' detected
+    #"G004", # logging statement uses f-string
+    "ANN101", # missing-type-self (ANN101) https://beta.ruff.rs/docs/rules/missing-type-self/
+    "ANN204", # missing-return-type-special-method (ANN204) https://beta.ruff.rs/docs/rules/missing-return-type-special-method
+]
+
+[tool.ruff.mccabe]
+max-complexity = 10  # https://en.wikipedia.org/wiki/Cyclomatic_complexity
+
+#[tool.ruff.isort]
+
+[tool.ruff.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", "pep257"
+
+[tool.ruff.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.pyline]
+# https://beta.ruff.rs/docs/settings/#pylint
+# Pylint Refactor
+max-args = 8        # NOTE: default = 5
+max-branches = 12   # NOTE: default = 12
+
+# There are some others like [tool.mypy]
