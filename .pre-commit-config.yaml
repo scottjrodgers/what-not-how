@@ -1,0 +1,5 @@
+repos:
+  # standard
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+
+# get Erin's help on what to put here.
