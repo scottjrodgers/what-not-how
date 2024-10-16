@@ -9,16 +9,16 @@ authors = [{name="Scott J. Rodgers", email="scott.j.rodgers@gmail.com"}, ]
 description = "A DSL and tools supporting the capturing of the intent of a system or process" # TODO UPDATE this
 requires-python = ">=3.10"
 
-[tools.setuptools]
+[tool.setuptools]
 package-dir = {"" = "src"}
 
-[tools.setuptools.dynamic]
+[tool.setuptools.dynamic]
 dependencies = {file = ["requirements/base.txt"]}
 
-[tools.setuptools-git-versioning]
+[tool.setuptools-git-versioning]
 enabled = true
 
-[tools.pytest.ini_options]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 
