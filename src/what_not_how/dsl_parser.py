@@ -1,20 +1,26 @@
 from typing import List, Dict, Optional
-from what_not_how.model_data import Process, DataObject, ModelGroup, DataIdentifier
-
+from what_not_how.model_data import (
+    Process, DataObject, ModelGroup, DataIdentifier, ModelOptions)
 
 # ------------------------------------------------------
 #   Language definitions
 # ------------------------------------------------------
 group_kw = ['group', 'ns', 'namespace']
+group_vars = ['implements']
+
+options_kw = ['options']
+options_vars = ['tool', 'title', 'filename', 'svg-name', 'recurse', 'flatten']
 
 process_kw = ['process']
+process_vars = ['desc', 'stackable']
 
 data_kw = ['data', 'file', 'concept']
+data_vars = ['desc']
 
 id_list_kw = ['input', 'inputs', 'in', 'output', 'outputs', 'out']
 
 str_list_kw = ['note', 'notes',
-               'description', 'desc', 'descr',
+               # 'description', 'desc', 'descr',
                'assumptions',
                'pre-conditions', 'pre-condition',
                'post-conditions', 'post-condition',
@@ -26,6 +32,9 @@ notes_kw = ['note', 'notes']
 assumption_kw = ['assumptions']
 pre_cond_kw = ['preconditions', 'pre-conditions']
 post_cond_kw = ['postconditions', 'post-conditions']
+# desc_kw = ['desc', 'descr', 'description']
+
+
 # fields_kw = ['fields', 'columns']
 
 
@@ -156,6 +165,28 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                     rest_of_line = line[pos2:].strip()
                     if len(rest_of_line) > 0:
                         tokens.append(rest_of_line)
+        elif tok1 in options_kw:
+            tokens.append(tok1)
+            if not error_check(pos < 0,
+                               f"A colon is expected after '{tok1}",
+                               line, line_no):
+                tok2, pos2 = next_token(line, pos)
+                if tok2 == ':':
+                    tokens.append(tok2)
+        elif (tok1 in options_vars or tok1 in group_vars or
+              tok1 in process_vars or tok1 in data_vars):
+            tokens.append(tok1)
+            if not error_check(pos < 0,
+                               f"A colon is expected after '{tok1}",
+                               line, line_no):
+                tok2, pos2 = next_token(line, pos)
+                if tok2 == ':':
+                    tokens.append(tok2)
+                if error_assert(pos2 > 0,
+                                "Expecting a value after the colon.",
+                                line, line_no):
+                    rest_of_line = line[pos2:].strip()
+                    tokens.append(rest_of_line)
         else:
             # Not starting with keyword, so whole line is the "token"
             tokens.append(line)
@@ -197,6 +228,22 @@ def group_action(tokens: List[str], node, _context, lines: List[str], line_no: i
         new_group = ModelGroup(identifier, parent=node)
         node.groups[identifier] = new_group
         return parse_group(lines, new_group, new_group, line_no + 1, this_indent)
+    return line_no + 1
+
+
+def options_action(tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int):
+    # options takes place within a group -- often the implied top-level group.  It applies to all sub-groups
+    #   where the settings are not overwritten (do I want that?)
+
+    n_tokens = len(tokens)
+    tok1 = tokens[1]
+    if error_assert(n_tokens > 2 and tokens[2] == ':',
+                    f"A line starting with '{tok1}' should be followed by a colon",
+                    lines[line_no], line_no):
+        new_options = ModelOptions()
+        # node remains the current active group
+        node.options = new_options
+        return parse_options(lines, new_options, node, line_no + 1, this_indent)
     return line_no + 1
 
 
@@ -279,15 +326,26 @@ def id_list_action(tokens: List[str], node, context, lines: List[str], line_no: 
         while t_idx < n_tokens:
             identifier_text = tokens[t_idx]
             assert len(identifier_text) > 0
-            if identifier_text[0] == '[' and identifier_text[-1] == ']':
-                identifier = identifier_text[1: -1]
+            if identifier_text[-1] == '+':
+                optional = False
+                stackable = True
+                identifier = identifier_text[:-1]
+            elif identifier_text[-1] == '*':
                 optional = True
+                stackable = True
+                identifier = identifier_text[:-1]
+            elif identifier_text[-1] == '?':
+                optional = True
+                stackable = False
+                identifier = identifier_text[:-1]
             else:
                 identifier = identifier_text
                 optional = False
+                stackable = False
 
             data_obj: DataObject = find_or_create_data_object(context, identifier)
-            target_list.append(DataIdentifier(identifier, data_obj.uid, optional))
+            target_list.append(DataIdentifier(identifier, data_obj.uid,
+                                              optional, stackable))
 
             t_idx += 1
             if t_idx < n_tokens:
@@ -318,6 +376,8 @@ def str_list_action(tokens: List[str], node, context, lines: List[str], line_no:
             target_list = node.preconditions
         elif list_name in post_cond_kw:
             target_list = node.postconditions
+        # elif list_name in desc_kw:
+        #     target_list = node.desc
         else:
             error_check(True, "Unknown str_list_type",
                         lines[line_no], line_no)
@@ -364,9 +424,62 @@ def identifiers_action(tokens: List[str], node, context, lines: List[str], line_
 def unquoted_string_action(tokens: List[str], node, _context, lines: List[str], line_no: int, this_indent: int):
     # this line is a single unquoted string
     n_tokens = len(tokens)
-    error_check(n_tokens > 2,"This line should have a single, unquoted string",
+    error_check(n_tokens > 2, "This line should have a single, unquoted string",
                 lines[line_no], line_no)
     node.append(tokens[1])
+    return line_no + 1
+
+
+def setting_action(tokens: List[str], node, _context, lines: List[str], line_no: int, _indent: int):
+    # this is for a single-line variable = value statement
+    n_tokens = len(tokens)
+    error_check(n_tokens != 4 or tokens[2] != ':',
+                "This line should have <variable name> : <value>",
+                lines[line_no], line_no)
+    variable = tokens[1]
+    value = tokens[3]
+
+    if variable == 'tool':
+        if error_assert(value in ['mermaid', 'd2'],
+                        "Tool needs to be either 'mermaid', or 'd2'",
+                        lines[line_no], line_no):
+            node.tool = value
+    elif variable == 'title':
+        node.title = value
+    elif variable == 'filename':
+        node.fname = value
+    elif variable == 'svg-name':
+        node.sbg_name = value
+    elif variable == 'recurse':
+        if error_assert(value in ['true', 'false'],
+                        "Value can be either 'true' or 'false'.",
+                        lines[line_no], line_no):
+            node.recurse = (value == 'true')
+    elif variable == 'flatten':
+        if error_assert(value in ['none', 'all'] or
+                        (value.isnumeric() and int(value) >= 0),
+                        "Value can be a non-negative integer, 'none', or 'all'",
+                        lines[line_no], line_no):
+            if value == 'none':
+                quantity = 0
+            elif value == 'all':
+                quantity = 999
+            else:
+                quantity = int(value)
+            node.flatten = quantity
+    elif variable == 'implements':
+        node.implements = value
+    elif variable == 'desc':
+        node.desc = value
+    elif variable == 'stackable':
+        if error_assert(value in ['true', 'false'],
+                        "Value can be either 'true' or 'false'.",
+                        lines[line_no], line_no):
+            node.stackable = (value == 'true')
+    else:
+        # skipping unknown variable
+        pass
+
     return line_no + 1
 
 
@@ -446,6 +559,18 @@ group_rules = [
     make_rule(
         predicate=keywords_predicate(process_kw),
         action=process_action),
+    make_rule(
+        predicate=keywords_predicate(options_kw),
+        action=options_action),
+    make_rule(
+        predicate=keywords_predicate(group_vars),
+        action=setting_action),
+]
+
+options_rules = [
+    make_rule(
+        predicate=keywords_predicate(options_vars),
+        action=setting_action),
 ]
 
 process_rules = [
@@ -455,12 +580,18 @@ process_rules = [
     make_rule(
         predicate=keywords_predicate(str_list_kw),
         action=str_list_action),
+    make_rule(
+        predicate=keywords_predicate(process_vars),
+        action=setting_action),
 ]
 
 data_rules = [
     make_rule(
         predicate=keywords_predicate(str_list_kw),
         action=str_list_action),
+    make_rule(
+        predicate=keywords_predicate(data_vars),
+        action=setting_action),
 ]
 
 id_list_rules = [
@@ -500,6 +631,10 @@ def parse_str_list(lines: List[str], node, context, start_line: int, start_inden
     return __parse_block(lines, node, context, start_line, start_indent, str_list_rules)
 
 
+def parse_options(lines: List[str], node, context, start_line: int, start_indent: int):
+    return __parse_block(lines, node, context, start_line, start_indent, options_rules)
+
+
 # ------------------------------------------------------
 #   Primary external interface
 # ------------------------------------------------------
@@ -532,9 +667,6 @@ def parse_model(fname: Optional[str] = None, lines: Optional[List[str]] = None):
     #     print(f"{i+1:2d}: {line}")
 
     model = ModelGroup(None)
-    parse_group(no_cr_lines, model, model,0, -1)
+    parse_group(no_cr_lines, model, model, 0, -1)
 
     return model, error_list
-
-
-

@@ -8,7 +8,8 @@ if __name__ == '__main__':
     # mdl, err_list = parse_model(fname='../../sample_documents/ns.what')
     # mdl, err_list = parse_model(fname='../../sample_documents/simple_test.what')
     # mdl, err_list = parse_model(fname='../../sample_documents/example_3_simplified.what')
-    mdl, err_list = parse_model(fname='../../sample_documents/example_3.what')
+    # mdl, err_list = parse_model(fname='../../sample_documents/example_3.what')
+    mdl, err_list = parse_model(fname='../../sample_documents/example_3_flattened.what')
 
     build_data_flow_graph(mdl)
     print("Boom! done.")

@@ -31,8 +31,6 @@ def _build(inputs, expected):
     _build("out: A, B, C", ['', 'out', ':', 'A', ',', 'B', ',', 'C']),
     _build("note:", ['', 'note', ':']),
     _build("notes:", ['', 'notes', ':']),
-    _build("description:", ['', 'description', ':']),
-    _build("descr:", ['', 'descr', ':']),
     _build("desc:", ['', 'desc', ':']),
     _build("assumptions:", ['', 'assumptions', ':']),
     _build("pre-conditions:", ['', 'pre-conditions', ':']),
@@ -40,6 +38,15 @@ def _build(inputs, expected):
     _build("post-conditions:", ['', 'post-conditions', ':']),
     _build("post-condition:", ['', 'post-condition', ':']),
     _build("Not a list: A, B, C", ['', 'Not a list: A, B, C']),
+    _build("options:", ['', 'options', ':']),
+    _build("tool: mermaid", ['', 'tool', ':', 'mermaid']),
+    _build("title: Example A", ['', 'title', ':', 'Example A']),
+    _build("filename: exp-A", ['', 'filename', ':', 'exp-A']),
+    _build("svg-name: output", ['', 'svg-name', ':', 'output']),
+    _build("recurse: true", ['', 'recurse', ':', 'true']),
+    _build("flatten: 2", ['', 'flatten', ':', '2']),
+    _build("flatten: false", ['', 'flatten', ':', 'false']),
+    _build("implements: Pr-1", ['', 'implements', ':', 'Pr-1']),
     ])
 def test_smart_tokenize(input_text, expected):
     assert smart_tokenize(input_text, 0) == expected
