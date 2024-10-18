@@ -1,0 +1,70 @@
+options:
+  tool: d2
+  title: Making Cookies
+  filename: making-cookies
+#  image: making-cookies.png
+  recurse: false
+  flatten: 0
+
+process MixDryIngr:
+  desc: Combine Dry Ingredients
+  in: Flour, bakingSoda, Salt
+  out: DryBlend
+
+process CombineButterAndSugar:
+  desc: Combine Butter and Sugar
+  in: RoomTempButter, BrownSugar, Sugar
+  out: SugarButter
+
+process MakeWetMixture:
+  desc: Combine Wet Ingredients
+  in: SugarButter, Egg, EggYolk, Vanilla
+  out: WetIngredients
+
+process CombineDryWet:
+  desc: Combine Dry and Wet Ingredients
+  in: WetIngredients, DryBlend
+  out: BaseDough
+
+process AddChips:
+  desc: Mix in Chocolate Chips
+  in: BaseDough, Chips
+  out: CookieDough
+
+process ShapeCookies:
+  desc: Shape Cookies
+  in: CookieDough
+  out: DoughBalls+
+
+process Bake:
+  desc: Bake the Cookies
+  in: CookieSheets+, DoughBalls+
+  out: Cookies+
+
+# need a different term for these:
+data bakingSoda:
+  desc: Baking Soda
+
+data DryBlend:
+  desc: Dry Blend
+
+data RoomTempButter:
+  desc: Room-Temperature Butter
+
+data BrownSugar:
+  desc: Brown Sugar
+
+data Sugar:
+  desc: Granulated Sugar
+
+data EggYolk:
+  desc: Egg Yolk
+
+data CookieDough:
+  desc: Cookie Dough
+
+data CookieSheets:
+  desc: Cookie Sheets
+
+data DoughBalls:
+  desc: Ball of Dough

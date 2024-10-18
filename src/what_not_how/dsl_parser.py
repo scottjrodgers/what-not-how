@@ -249,7 +249,7 @@ def group_action(
             while identifier in node.groups:
                 identifier += "'"
 
-        new_group = ModelGroup(identifier, parent=node)
+        new_group = ModelGroup(name=identifier, parent=node)
         node.groups[identifier] = new_group
         return parse_group(lines, new_group, new_group, line_no + 1, this_indent)
     return line_no + 1
@@ -290,7 +290,7 @@ def data_action(
     ):
         identifier = tokens[2]
         if error_check(
-            identifier in node.data_objects,
+            identifier in node.data_objects and node.data_objects[identifier].kind != 'UNDEFINED',
             f"Data object '{identifier}' is already defined in the current namespace.",
             lines[line_no],
             line_no,
@@ -298,7 +298,12 @@ def data_action(
             while identifier in node.data_objects:
                 identifier += "'"
 
-        new_data = DataObject(kind=tok1.upper, name=identifier, parent=node)
+        if identifier not in node.data_objects:
+            new_data = DataObject(kind=tok1.upper(), name=identifier, parent=node)
+        else:
+            new_data = node.data_objects[identifier]
+            new_data.kind = tok1.upper()
+            new_data.parent = node
         node.data_objects[identifier] = new_data
         return parse_data(lines, new_data, context, line_no + 1, this_indent)
     return line_no + 1
@@ -394,7 +399,7 @@ def id_list_action(
 
             data_obj: DataObject = find_or_create_data_object(context, identifier)
             target_list.append(
-                DataIdentifier(identifier, data_obj.uid, optional, stackable)
+                DataIdentifier(name=identifier, identifier_id=data_obj.uid, optional=optional, stackable=stackable)
             )
 
             t_idx += 1
@@ -460,15 +465,27 @@ def identifiers_action(
         identifier_text = tokens[t_idx]
         assert len(identifier_text) > 0
 
-        if identifier_text[0] == "[" and identifier_text[-1] == "]":
-            identifier = identifier_text[1:-1]
+        if identifier_text[-1] == "+":
+            optional = False
+            stackable = True
+            identifier = identifier_text[:-1]
+        elif identifier_text[-1] == "*":
             optional = True
+            stackable = True
+            identifier = identifier_text[:-1]
+        elif identifier_text[-1] == "?":
+            optional = True
+            stackable = False
+            identifier = identifier_text[:-1]
         else:
             identifier = identifier_text
             optional = False
+            stackable = False
 
         data_obj: DataObject = find_or_create_data_object(context, identifier)
-        node.append(DataIdentifier(identifier, data_obj.uid, optional))
+        node.append(
+            DataIdentifier(name=identifier, identifier_id=data_obj.uid, optional=optional, stackable=stackable)
+        )
 
         t_idx += 1
         if t_idx < n_tokens:
@@ -527,7 +544,7 @@ def setting_action(
     elif variable == "filename":
         node.fname = value
     elif variable == "svg-name":
-        node.sbg_name = value
+        node.svg_name = value
     elif variable == "recurse":
         if error_assert(
             value in ["true", "false"],
@@ -741,7 +758,7 @@ def parse_model(fname: Optional[str] = None, lines: Optional[List[str]] = None):
     # for i, line in enumerate(lines):
     #     print(f"{i+1:2d}: {line}")
 
-    model = ModelGroup(None)
+    model = ModelGroup(name="")
     parse_group(no_cr_lines, model, model, 0, -1)
 
     return model, error_list

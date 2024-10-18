@@ -34,15 +34,66 @@ Or perhaps it's:
         output: DataFlowDiagram_SVG
 """
 
-from model_data import ModelGroup  #, Process, DataObject, DataIdentifier
+from model_data import ModelGroup, Process, DataObject, ModelOptions, DataIdentifier
+from typing import List, Tuple
 
 
 def build_data_flow_graph(mdl: ModelGroup) -> None:
-    if mdl.options and mdl.options.tool == "d2":
-        build_d2_graph(mdl)
-    else:
+    # tool = get_options(mdl).tool
+    # proc_list, obj_list = preprocess_graph_nodes(mdl)
+    if mdl.options and mdl.options.tool == "mermaid":
         assert False, "Not fully implemented"
         # build_mermaid_graph(mdl)
+    else:
+        build_d2_graph(mdl)
+
+
+def get_options(mdl: ModelGroup) -> ModelOptions:
+    m = mdl
+    while m.options is None and m.parent is not None:
+        m = m.parent
+    if m.options is not None:
+        return m.options
+    else:
+        return ModelOptions()
+
+
+def preprocess_graph_nodes(mdl: ModelGroup) -> Tuple[List[Process], List[DataObject]]:
+    """
+    Collects the processes and data objects to place in the generated graph.  This function handles if the
+    graph is to be generated starting at a lower level, or if it will flatten some number of layers
+
+    Parameters
+    ----------
+    mdl: Model Group
+        A collection of processes, data objects, and child model groups.  Together they define a system.
+
+    Returns
+    -------
+    List[Process], List[DataObject]
+        A list of the processes to include in this graph, and a list of data objects to include in this graph
+    """
+    process_list: List[Process] = []
+    data_list: List[DataObject] = []
+
+    max_depth = get_options(mdl).flatten
+    collect_and_recurse(mdl, process_list, data_list, max_depth, 0)
+
+    return process_list, data_list
+
+
+def collect_and_recurse(mdl: ModelGroup,
+                        process_list: List[Process],
+                        data_list: List[DataObject],
+                        max_depth: int = 0,
+                        depth: int = 0) -> None:
+    for o in mdl.data_objects.values():
+        data_list.append(o)
+    for p in mdl.processes.values():
+        process_list.append(p)
+    if depth < max_depth:
+        for g in mdl.groups.values():
+            collect_and_recurse(g, process_list, data_list, max_depth, depth + 1)
 
 
 def build_d2_graph(mdl: ModelGroup) -> None:
@@ -83,6 +134,9 @@ def build_d2_graph(mdl: ModelGroup) -> None:
             else:
                 label = p.name
             s = identifier + ": " + label
+            f.write(s + "\n")
+            print(s)
+            s = f"{identifier}.shape: Hexagon"
             f.write(s + "\n")
             print(s)
 

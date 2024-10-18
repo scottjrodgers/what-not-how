@@ -51,7 +51,7 @@ source = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = "src"
+source = ["src"]
 relative_files = true
 
 [tool.coverage.report]
@@ -80,16 +80,16 @@ lint.ignore = [
     "ANN204", # missing-return-type-special-method (ANN204) https://beta.ruff.rs/docs/rules/missing-return-type-special-method
 ]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10  # https://en.wikipedia.org/wiki/Cyclomatic_complexity
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"  # Accepts: "google", "numpy", "pep257"
 
-[tool.ruff.flake8-bandit]
+[tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 # https://beta.ruff.rs/docs/settings/#pylint
 # Pylint Refactor
 max-args = 5        # NOTE: default = 5

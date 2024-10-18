@@ -1,78 +1,68 @@
 from typing import Optional, Dict, List
+from pydantic import BaseModel, Field
 
 
 _next_unique_id: int = 1
 
 
-class ModelGroup:
-    def __init__(self, name=None, parent=None):
-        global _next_unique_id
-        self.uid = _next_unique_id
-        _next_unique_id += 1
-
-        self.name: str = name
-        self.processes: Dict[str, Process] = {}
-        self.data_objects: Dict[str, DataObject] = {}
-        self.groups: Dict[str, ModelGroup] = {}
-        self.parent: Optional[ModelGroup] = parent
-        self.implements: Optional[str] = None
-        self.options: Optional[ModelOptions] = None
+def get_uid() -> int:
+    global _next_unique_id
+    my_id = _next_unique_id
+    _next_unique_id += 1
+    return my_id
 
 
-class Process:
-    def __init__(self, name=None, parent=None):
-        global _next_unique_id
-        self.uid: int = _next_unique_id
-        _next_unique_id += 1
-
-        self.name: int = name
-        self.inputs: List[DataIdentifier] = []
-        self.outputs: List[DataIdentifier] = []
-        self.notes: List[str] = []
-        self.pre_conditions: List[str] = []
-        self.post_conditions: List[str] = []
-        self.parent: Optional[ModelGroup] = parent
-        self.desc: Optional[str] = None
-        self.stackable: bool = False
-        self.implemented_by: Optional[ModelGroup] = None
+class ModelGroup (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    processes: Dict[str, 'Process'] = {}
+    data_objects: Dict[str, 'DataObject'] = {}
+    groups: Dict[str, 'ModelGroup'] = {}
+    parent: Optional['ModelGroup'] = None
+    implements: Optional[str] = None
+    options: Optional['ModelOptions'] = None
 
 
-class DataObject:
-    def __init__(self, kind, name=None, parent=None):
-        global _next_unique_id
-        self.uid: int = _next_unique_id
-        _next_unique_id += 1
-
-        self.name: str = name
-        self.kind: str = kind
-        self.notes: List[str] = []
-        self.assumptions: List[str] = []
-        self.fields = []  # Not yet used
-        self.parent: Optional[ModelGroup] = parent
-        self.desc: Optional[str] = None
+class DataObject (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    kind: str
+    notes: List[str] = []
+    assumptions: List[str] = []
+    fields: List[str] = []
+    parent: Optional[ModelGroup] = None
+    desc: Optional[str] = None
 
 
-class DataIdentifier:
-    def __init__(
-        self, name: str, uid: int, optional: bool = False, stackable: bool = False
-    ):
-        self.identifier_id: int = uid
-        self.name: str = name
-        self.optional: bool = optional
-        self.stackable: bool = stackable
-
-    def __repr__(self):
-        val = f"{self.name}"
-        if self.optional:
-            val += " (opt)"
-        return val
+class Process (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    inputs: List['DataIdentifier'] = []
+    outputs: List['DataIdentifier'] = []
+    notes: List[str] = []
+    pre_conditions: List[str] = []
+    post_conditions: List[str] = []
+    parent: Optional[ModelGroup] = None
+    desc: Optional[str] = None
+    stackable: bool = False
+    implemented_by: Optional[ModelGroup] = None
 
 
-class ModelOptions:
-    def __init__(self):
-        self.tool: str = "mermaid"
-        self.title: str = ""
-        self.fname: str = "output"
-        self.svg_name: Optional[str] = None
-        self.recurse: bool = True
-        self.flatten: int = 0
+class DataIdentifier (BaseModel):
+    name: str
+    identifier_id: int
+    optional: bool
+    stackable: bool
+
+
+class ModelOptions (BaseModel):
+    tool: str = "d2"
+    title: str = ""
+    fname: str = "output"
+    svg_name: Optional[str] = None
+    recurse: bool = True
+    flatten: int = 0
+
+
+ModelGroup.model_rebuild()
+Process.model_rebuild()
