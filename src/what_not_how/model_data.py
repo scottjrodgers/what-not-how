@@ -1,3 +1,6 @@
+from typing import Optional, Dict, List
+
+
 _next_unique_id: int = 1
 
 
@@ -7,54 +10,56 @@ class ModelGroup:
         self.uid = _next_unique_id
         _next_unique_id += 1
 
-        self.name = name
-        self.processes = {}
-        self.data_objects = {}
-        self.groups = {}
-        self.parent = parent
-        self.implements = None
-        self.options = None
+        self.name: str = name
+        self.processes: Dict[str, Process] = {}
+        self.data_objects: Dict[str, DataObject] = {}
+        self.groups: Dict[str, ModelGroup] = {}
+        self.parent: Optional[ModelGroup] = parent
+        self.implements: Optional[str] = None
+        self.options: Optional[ModelOptions] = None
 
 
 class Process:
     def __init__(self, name=None, parent=None):
         global _next_unique_id
-        self.uid = _next_unique_id
+        self.uid: int = _next_unique_id
         _next_unique_id += 1
 
-        self.name = name
-        self.inputs = []
-        self.outputs = []
-        self.notes = []
-        self.pre_conditions = []
-        self.post_conditions = []
-        self.parent = parent
-        self.desc = None
-        self.stackable = False
+        self.name: int = name
+        self.inputs: List[DataIdentifier] = []
+        self.outputs: List[DataIdentifier] = []
+        self.notes: List[str] = []
+        self.pre_conditions: List[str] = []
+        self.post_conditions: List[str] = []
+        self.parent: Optional[ModelGroup] = parent
+        self.desc: Optional[str] = None
+        self.stackable: bool = False
+        self.implemented_by: Optional[ModelGroup] = None
 
 
 class DataObject:
     def __init__(self, kind, name=None, parent=None):
         global _next_unique_id
-        self.uid = _next_unique_id
+        self.uid: int = _next_unique_id
         _next_unique_id += 1
 
-        self.name = name
-        self.kind = kind
-        self.notes = []
-        self.assumptions = []
-        self.fields = []
-        self.parent = parent
-        self.desc = None
+        self.name: str = name
+        self.kind: str = kind
+        self.notes: List[str] = []
+        self.assumptions: List[str] = []
+        self.fields = []  # Not yet used
+        self.parent: Optional[ModelGroup] = parent
+        self.desc: Optional[str] = None
 
 
 class DataIdentifier:
-    def __init__(self, name: str, uid: int,
-                 optional=False, stackable=False):
-        self.identifier_id = uid
-        self.name = name
-        self.optional = optional
-        self.stackable = stackable
+    def __init__(
+        self, name: str, uid: int, optional: bool = False, stackable: bool = False
+    ):
+        self.identifier_id: int = uid
+        self.name: str = name
+        self.optional: bool = optional
+        self.stackable: bool = stackable
 
     def __repr__(self):
         val = f"{self.name}"
@@ -65,9 +70,9 @@ class DataIdentifier:
 
 class ModelOptions:
     def __init__(self):
-        self.tool = 'mermaid'
-        self.title = ""
-        self.fname = "output"
-        self.svg_name = None
-        self.recurse = True
-        self.flatten = 0
+        self.tool: str = "mermaid"
+        self.title: str = ""
+        self.fname: str = "output"
+        self.svg_name: Optional[str] = None
+        self.recurse: bool = True
+        self.flatten: int = 0

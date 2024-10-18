@@ -41,4 +41,3 @@ process BuildObjectiveFunction:
         KPI-Level-Weights
     notes:
         maximize Weight(margin) * sum(...) - need to think about this more
-

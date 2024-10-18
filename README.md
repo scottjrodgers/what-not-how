@@ -25,10 +25,5 @@
   - Provide a means for providing global settings like the tool: mermaid or D2, the orientation (L->R or Top->Bottom)
   - filename base for the diagram code generated
   - image file basename for the SVG images produced
-  - a base title for the different diagrams based on what each is zoomed in on 
+  - a base title for the different diagrams based on what each is zoomed in on
   - etc.
-
-
-
-
-
