@@ -32,7 +32,7 @@ def __generate_input_lines() -> List[str]:
     if len(lines[-1]) == 0:
         lines = lines[:-1]
     for i in range(len(lines) - 1):
-        lines[i] += '\n'
+        lines[i] += "\n"
     return lines
 
 
@@ -40,4 +40,3 @@ def test_parse_file():
     line_list = __generate_input_lines()
     mdl, err_list = parse_model(lines=line_list)
     print("asefaseF")
-

@@ -1,73 +1,68 @@
+from typing import Optional, Dict, List
+from pydantic import BaseModel, Field
+
+
 _next_unique_id: int = 1
 
 
-class ModelGroup:
-    def __init__(self, name=None, parent=None):
-        global _next_unique_id
-        self.uid = _next_unique_id
-        _next_unique_id += 1
-
-        self.name = name
-        self.processes = {}
-        self.data_objects = {}
-        self.groups = {}
-        self.parent = parent
-        self.implements = None
-        self.options = None
+def get_uid() -> int:
+    global _next_unique_id
+    my_id = _next_unique_id
+    _next_unique_id += 1
+    return my_id
 
 
-class Process:
-    def __init__(self, name=None, parent=None):
-        global _next_unique_id
-        self.uid = _next_unique_id
-        _next_unique_id += 1
-
-        self.name = name
-        self.inputs = []
-        self.outputs = []
-        self.notes = []
-        self.pre_conditions = []
-        self.post_conditions = []
-        self.parent = parent
-        self.desc = None
-        self.stackable = False
+class ModelGroup (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    processes: Dict[str, 'Process'] = {}
+    data_objects: Dict[str, 'DataObject'] = {}
+    groups: Dict[str, 'ModelGroup'] = {}
+    parent: Optional['ModelGroup'] = None
+    implements: Optional[str] = None
+    options: Optional['ModelOptions'] = None
 
 
-class DataObject:
-    def __init__(self, kind, name=None, parent=None):
-        global _next_unique_id
-        self.uid = _next_unique_id
-        _next_unique_id += 1
-
-        self.name = name
-        self.kind = kind
-        self.notes = []
-        self.assumptions = []
-        self.fields = []
-        self.parent = parent
-        self.desc = None
+class DataObject (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    kind: str
+    notes: List[str] = []
+    assumptions: List[str] = []
+    fields: List[str] = []
+    parent: Optional[ModelGroup] = None
+    desc: Optional[str] = None
 
 
-class DataIdentifier:
-    def __init__(self, name: str, uid: int,
-                 optional=False, stackable=False):
-        self.identifier_id = uid
-        self.name = name
-        self.optional = optional
-        self.stackable = stackable
+class Process (BaseModel):
+    uid: int = Field(default_factory=get_uid)
+    name: str
+    inputs: List['DataIdentifier'] = []
+    outputs: List['DataIdentifier'] = []
+    notes: List[str] = []
+    pre_conditions: List[str] = []
+    post_conditions: List[str] = []
+    parent: Optional[ModelGroup] = None
+    desc: Optional[str] = None
+    stackable: bool = False
+    implemented_by: Optional[ModelGroup] = None
 
-    def __repr__(self):
-        val = f"{self.name}"
-        if self.optional:
-            val += " (opt)"
-        return val
+
+class DataIdentifier (BaseModel):
+    name: str
+    identifier_id: int
+    optional: bool
+    stackable: bool
 
 
-class ModelOptions:
-    def __init__(self):
-        self.tool = 'mermaid'
-        self.title = ""
-        self.fname = "output"
-        self.svg_name = None
-        self.recurse = True
-        self.flatten = 0
+class ModelOptions (BaseModel):
+    tool: str = "d2"
+    title: str = ""
+    fname: str = "output"
+    svg_name: Optional[str] = None
+    recurse: bool = True
+    flatten: int = 0
+
+
+ModelGroup.model_rebuild()
+Process.model_rebuild()

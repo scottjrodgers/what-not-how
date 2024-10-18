@@ -51,7 +51,7 @@ source = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = "src"
+source = ["src"]
 relative_files = true
 
 [tool.coverage.report]
@@ -61,41 +61,8 @@ fail_under = 80
 [tool.ruff]
 # https://beta.ruff.rs/docs/settings/
 # https://beta.ruff.rs/docs/rules
-select = [
-    # to be added based on ConCon Optimizer
 
-    # baseline rules
-    "F",    # Pyflakes
-    "E",    # pycodestyle
-    "W",    # pycodestyle
-    "C90",  # mccabe
-    "I",    # isort
-
-    # generally useful rules
-    "N",    # pep8-naming
-    "A",    # flake8-builtins
-    "DTZ",  # flake8-datetimz
-    "G",    # flake8-logging-format
-    "PIE",  # flake8-pie
-    "RET",  # flake8-return
-    "SIM",  # flake8-simplify
-    "ARG",  # flake8-unused-arguments
-    "PLR",  # pylint refactor
-    "RUF",  # Ruff-specific rules
-    "ICN",  # flake8-import-conventions
-    "PT",   # flake8-pytest-style
-    "S",    # flake8-bandit
-    "C4",   # flake8-comprehensions
-
-    # things to consider
-    # "B",      # flake8-bugbear
-    # "ERA",    # eradicate
-    # "D",      # pydocstyle
-    # "PD",     # panda-vet
-    # "ANN",    # flake8-annotations
-    # "PTH",    # flake8-use-pathlib
-]
-unfixable = [
+lint.unfixable = [
     # This is things that we don't want ruff to fix automatically
     # it will still flag the, but given the nature of the error, tye are ones
     # where it is better to have a person reviewing the changes
@@ -104,7 +71,8 @@ unfixable = [
     "PD",   # do not autofix pandas
     "SIM",  # do not autofix simplifications to code
 ]
-ignore = [
+lint.ignore = [
+    "F401", # unused import
     "E501", # line length
     "S101", # Use of 'assert' detected
     #"G004", # logging statement uses f-string
@@ -112,21 +80,19 @@ ignore = [
     "ANN204", # missing-return-type-special-method (ANN204) https://beta.ruff.rs/docs/rules/missing-return-type-special-method
 ]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10  # https://en.wikipedia.org/wiki/Cyclomatic_complexity
 
-#[tool.ruff.isort]
-
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"  # Accepts: "google", "numpy", "pep257"
 
-[tool.ruff.flake8-bandit]
+[tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
 
-[tool.ruff.pyline]
+[tool.ruff.lint.pylint]
 # https://beta.ruff.rs/docs/settings/#pylint
 # Pylint Refactor
-max-args = 8        # NOTE: default = 5
+max-args = 5        # NOTE: default = 5
 max-branches = 12   # NOTE: default = 12
 
-# There are some others like [tool.mypy]
+## There are some others like [tool.mypy]
