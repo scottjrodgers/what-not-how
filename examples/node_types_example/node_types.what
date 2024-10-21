@@ -1,19 +1,17 @@
 options:
     tool: d2
-    title: Example 3
-    filename: exp3
-    svg-name: exp3_diagram
+    title: Node Types
+    filename: node_types
+    svg-name: node_types
     recurse: true
     flatten: 0
 
-# top-level data definitions
+# Pre-declare data objects referenced
 data A
 data B
 data C
 data X
 data Y
-
-
 data D
 data E
 data F

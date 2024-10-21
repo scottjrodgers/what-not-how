@@ -17,8 +17,8 @@ process SolveGurobiModel:
     notes: Solve a Mixed-Integer Programming model using Gurobi
     output:
         Optimal_DV_Values
-        [Constraint_Relaxation_Info]
-        [MIP_Error_List]
+        Constraint_Relaxation_Info?
+        MIP_Error_List?
     input:
         Gurobi_Model
 

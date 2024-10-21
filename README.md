@@ -27,3 +27,9 @@
   - image file basename for the SVG images produced
   - a base title for the different diagrams based on what each is zoomed in on
   - etc.
+
+## Notes:
+- For coverage, `pytest --cov=src --cov-report=html` will run basic coverage and
+  record the coverage in an HTML format in the directory `htmlcov`.
+- `pytest --cov=src --cov-report=TYPE` for a special report format.
+   Examples for TYPE are `annotate`, `html`, `term`, and `term-missing`.

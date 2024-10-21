@@ -1,0 +1,64 @@
+vars: {
+  d2-config: {
+     theme-id: 1
+  }
+}
+D3: Flour
+D4: Baking Soda
+D5: Salt
+D6: Dry Blend
+D8: Room-Temperature Butter
+D9: Brown Sugar
+D10: Granulated Sugar
+D11: SugarButter
+D13: Egg
+D14: Egg Yolk
+D15: Vanilla
+D16: WetIngredients
+D18: BaseDough
+D20: Chips
+D21: Cookie Dough
+D23: Ball of Dough
+D25: Cookie Sheets
+D26: Cookies
+P2: Combine Dry Ingredients
+P2.shape: Hexagon
+P7: Combine Butter and Sugar
+P7.shape: Hexagon
+P12: Combine Wet Ingredients
+P12.shape: Hexagon
+P17: Combine Dry and Wet Ingredients
+P17.shape: Hexagon
+P19: Mix in Chocolate Chips
+P19.shape: Hexagon
+P22: Shape Cookies
+P22.shape: Hexagon
+P24: Bake the Cookies
+P24.shape: Hexagon
+D3 -> P2
+D4 -> P2
+D5 -> P2
+P2 -> D6
+D8 -> P7
+D9 -> P7
+D10 -> P7
+P7 -> D11
+D11 -> P12
+D13 -> P12
+D14 -> P12
+D15 -> P12
+P12 -> D16
+D16 -> P17
+D6 -> P17
+P17 -> D18
+D18 -> P19
+D20 -> P19
+P19 -> D21
+D21 -> P22
+P22 -> D23
+D25 -> P24
+D23 -> P24
+P24 -> D26
+D26.style.multiple: true
+D25.style.multiple: true
+D23.style.multiple: true
