@@ -1,8 +1,8 @@
 options:
   tool: d2
   title: Making Cookies
-  filename: making-cookies
-#  image: making-cookies.png
+  filename: cookies
+  image: cookies.png
   recurse: false
   flatten: 0
 

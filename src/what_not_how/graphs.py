@@ -38,14 +38,14 @@ from model_data import ModelGroup, Process, DataObject, ModelOptions, DataIdenti
 from typing import List, Tuple
 
 
-def build_data_flow_graph(mdl: ModelGroup) -> None:
+def build_data_flow_graph(mdl: ModelGroup, output_basename: str, debug=False) -> None:
     # tool = get_options(mdl).tool
     # proc_list, obj_list = preprocess_graph_nodes(mdl)
     if mdl.options and mdl.options.tool == "mermaid":
         assert False, "Not fully implemented"
         # build_mermaid_graph(mdl)
     else:
-        build_d2_graph(mdl)
+        build_d2_graph(mdl, output_basename)
 
 
 def get_options(mdl: ModelGroup) -> ModelOptions:
@@ -96,7 +96,7 @@ def collect_and_recurse(mdl: ModelGroup,
             collect_and_recurse(g, process_list, data_list, max_depth, depth + 1)
 
 
-def build_d2_graph(mdl: ModelGroup) -> None:
+def build_d2_graph(mdl: ModelGroup, output_basename:str, debug=False) -> None:
     """
 
     Parameters
@@ -104,12 +104,14 @@ def build_d2_graph(mdl: ModelGroup) -> None:
     mdl : ModelGroup
         The top-level data structure for the objects to be encoded into a model
 
+    output_basename : str
+        the filename of the input file with the extension stripped off.
     Returns
     -------
     TBD
     """
 
-    with open("output.d2", "w") as f:
+    with open(f"{output_basename}.d2", "w") as f:
         f.write("vars: { \n")
         f.write("  d2-config: { \n")
         f.write("     theme-id: 1\n")
@@ -125,7 +127,8 @@ def build_d2_graph(mdl: ModelGroup) -> None:
                 label = d.name
             s = identifier + ": " + label
             f.write(s + "\n")
-            print(s)
+            if debug:
+                print(s)
 
         for p in mdl.processes.values():
             identifier = f"P{p.uid}"
@@ -135,15 +138,18 @@ def build_d2_graph(mdl: ModelGroup) -> None:
                 label = p.name
             s = identifier + ": " + label
             f.write(s + "\n")
-            print(s)
+            if debug:
+                print(s)
             s = f"{identifier}.shape: Hexagon"
             f.write(s + "\n")
-            print(s)
+            if debug:
+                print(s)
 
             if p.stackable:
                 s = f"{identifier}.style.multiple: true"
                 f.write(s + "\n")
-                print(s)
+                if debug:
+                    print(s)
 
         # step two: Extract and print out the information for each edge
         stackable_data = set()
@@ -167,15 +173,18 @@ def build_d2_graph(mdl: ModelGroup) -> None:
                     if optional:
                         s += " {style: {stroke-dash: 3}}"
                     f.write(s + "\n")
-                    print(s)
+                    if debug:
+                        print(s)
         for data_id in stackable_data:
             s = f"{data_id}.style.multiple: true"
             f.write(s + "\n")
-            print(s)
+            if debug:
+                print(s)
         for data_id in optional_data:
             s = f"{data_id}.style.stroke-dash: 3"
             f.write(s + "\n")
-            print(s)
+            if debug:
+                print(s)
 
 
 # def build_mermaid_graph(mdl: ModelGroup) -> None:

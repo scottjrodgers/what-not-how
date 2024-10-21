@@ -20,7 +20,7 @@ enabled = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src", "."]
+pythonpath = "src"
 
 [tool.interrogate]
 ignore-init-method = true
