@@ -1,4 +1,0 @@
-ns test-ns:
-    process X:
-        input: A
-        output: B
