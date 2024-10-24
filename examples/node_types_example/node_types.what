@@ -6,55 +6,66 @@ options:
     recurse: true
     flatten: 0
 
-# Pre-declare data objects referenced
-data A
-data B
-data C
-data X
-data Y
-data D
-data E
-data F
-data G
-data H
-data I
-data J
-data K
-data L
-data M
 
-process p1:
-    desc: Process 1
-    in: B, C+
-    out: D, E+
+process p1: Process 1
+    in:
+        B (Config)
+        C+ (Data Frame)
+    out:
+        D (Summary Stats)
+        E+ (Data Partitions)
 
-process p2:
-    desc: Process 2
-    in: B, C+
-    out: F, G+, H?
 
-process p3:
-    desc: Process 3
-    in: A, B, C+
-    out: I, J?
+process p2: Process 2
+    in:
+        B
+        C+
+    out:
+        F (Feature Importance)
+        G+ (Data Clusters)
+        H? (Outlier List)
 
-process p4:
-    desc: Process 4
-    in: D, F
-    out: K
 
-process p5:
-    desc: Process 5
+process p3: Process 3
+    in:
+        A (Data Dictionary)
+        B
+        C+
+    out:
+        I (I Data)
+        J? (J Data)
+
+
+process p4: Process 4
+    in:
+        D (D Data)
+        F (F Data)
+    out:
+        K (K Data)
+
+
+process p5: Process 5
     stackable: true
-    in: E, G
-    out: L, M?
+    in:
+        E (E Data)
+        G (G Data)
+    out:
+        L (L Data)
+        M? (M Data)
 
-process p6:
-    desc: Process 6
-    in: M?, H?, J?
-    output: Y?
 
-process p7:
-    desc: Process 7
-    in: K, L+
-    out: X
+process p6: Process 6
+    in:
+        M?
+        H?
+        J?
+    output:
+        Y? (Optional Output)
+
+
+process p7: Process 7
+    in:
+        K
+        L+
+    out:
+        X (Final Report)

@@ -1,5 +1,10 @@
 import pytest
-from what_not_how.dsl_parser import smart_tokenize, index_of_next_space, index_of_next_non_space
+from what_not_how.dsl_parser import (
+    smart_tokenize,
+    index_of_next_space,
+    index_of_next_non_space,
+    decode_identifier_string
+)
 
 
 def _build(inputs, expected):
@@ -20,13 +25,8 @@ def _build(inputs, expected):
             "group A: extra info: be aware",
             ["", "group", "A", ":", "extra info: be aware"],
         ),
-        _build("ns alpha :  ", ["", "ns", "alpha", ":"]),
         _build("nas beta   :", ["", "nas beta   :"]),
-        _build("namespace gamma:", ["", "namespace", "gamma", ":"]),
         _build("  process A:", ["  ", "process", "A", ":"]),
-        _build("data A", ["", "data", "A"]),
-        _build("file X", ["", "file", "X"]),
-        _build("  concept Z:", ["  ", "concept", "Z", ":"]),
         _build("inputs:", ["", "inputs", ":"]),
         _build("input:", ["", "input", ":"]),
         _build("  in  : ", ["  ", "in", ":"]),
@@ -36,7 +36,6 @@ def _build(inputs, expected):
         _build("out: A, B, C", ["", "out", ":", "A", ",", "B", ",", "C"]),
         _build("note:", ["", "note", ":"]),
         _build("notes:", ["", "notes", ":"]),
-        _build("desc:", ["", "desc", ":"]),
         _build("assumptions:", ["", "assumptions", ":"]),
         _build("pre-conditions:", ["", "pre-conditions", ":"]),
         _build("pre-condition:", ["", "pre-condition", ":"]),
@@ -92,3 +91,22 @@ def test_index_of_next_space(inputs, expected):
 )
 def test_index_of_next_non_space(inputs, expected):
     assert index_of_next_non_space(inputs[0], inputs[1]) == expected
+
+
+@pytest.mark.parametrize(
+    "inputs, expected",
+    [
+        _build("A", ("A", "A", False, False)),
+        _build("A?", ("A", "A", True, False)),
+        _build("A+", ("A", "A", False, True)),
+        _build("A*", ("A", "A", True, True)),
+        _build("A (A Description)", ("A", "A Description", False, False)),
+        _build("A? (A Description)", ("A", "A Description", True, False)),
+        _build("A+ (A Description)", ("A", "A Description", False, True)),
+        _build("A* (A Description)", ("A", "A Description", True, True)),
+        _build("A*(A Description)", ("A", "A Description", True, True)),
+    ],
+)
+# Outputs are: Identifier, Description String, Optional, Stackable
+def test_decode_identifier_string(inputs, expected):
+    assert decode_identifier_string(inputs) == expected
