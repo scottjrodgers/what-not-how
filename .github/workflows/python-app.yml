@@ -30,4 +30,4 @@ jobs:
         pip install -r requirements/base.txt
     - name: Test with pytest
       run: |
-        pytest -cov
+        pytest --cov=src
