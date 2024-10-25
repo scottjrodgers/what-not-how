@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional
+from pydantic import BaseModel, Field
+from typing import List, Dict, Set, Optional
 from what_not_how.model_data import (
     Process,
     DataObject,
@@ -7,42 +8,39 @@ from what_not_how.model_data import (
     ModelOptions,
 )
 
+
 # ------------------------------------------------------
 #   Language definitions
 # ------------------------------------------------------
-group_kw = ["group", "ns", "namespace"]
-group_vars = ["implements"]
+class DSL (BaseModel):
 
-options_kw = ["options"]
-options_vars = ["tool", "title", "filename", "svg-name", "recurse", "flatten"]
+    group_kw: Set[str] = Field(default={"group", "detail", "details"}, frozen=True)
+    group_vars: Set[str] = Field(default={"implements"}, frozen=True)
 
-process_kw = ["process"]
-process_vars = ["desc", "stackable"]
+    options_kw: Set[str] = Field(default={"options"}, frozen=True)
+    options_vars: Set[str] = Field(default={"tool", "title", "filename", "svg-name", "recurse", "flatten"}, frozen=True)
 
-data_kw = ["data", "file", "concept"]
-data_vars = ["desc"]
+    process_kw: Set[str] = Field(default={"process", "function", "procedure"}, frozen=True)
+    process_vars: Set[str] = Field(default={"stackable"}, frozen=True)
+    data_kw: Set[str] = Field(default={}, frozen=True)
+    data_vars: Set[str] = Field(default={}, frozen=True)
+    input_kw: Set[str] = Field(default={"in", "input", "inputs"}, frozen=True)
+    output_kw: Set[str] = Field(default={"out", "output", "outputs"}, frozen=True)
+    notes_kw: Set[str] = Field(default={"note", "notes"}, frozen=True)
+    assumption_kw: Set[str] = Field(default={"assumptions"}, frozen=True)
+    pre_cond_kw: Set[str] = Field(default={"pre-condition", "pre-conditions"}, frozen=True)
+    post_cond_kw: Set[str] = Field(default={"post-condition", "post-conditions"}, frozen=True)
 
-id_list_kw = ["input", "inputs", "in", "output", "outputs", "out"]
+    @property
+    def id_list_kw(self) -> Set[str]:
+        return self.input_kw.union(self.output_kw)
 
-str_list_kw = [
-    "note",
-    "notes",
-    "assumptions",
-    "pre-conditions",
-    "pre-condition",
-    "post-conditions",
-    "post-condition",
-]
-
-input_kw = ["in", "input", "inputs"]
-output_kw = ["out", "output", "outputs"]
-notes_kw = ["note", "notes"]
-assumption_kw = ["assumptions"]
-pre_cond_kw = ["preconditions", "pre-conditions"]
-post_cond_kw = ["postconditions", "post-conditions"]
+    @property
+    def str_list_kw(self) -> Set[str]:
+        return self.notes_kw.union(self.assumption_kw, self.pre_cond_kw, self.post_cond_kw)
 
 
-# fields_kw = ['fields', 'columns']
+dsl = DSL()
 
 
 # ------------------------------------------------------
@@ -135,7 +133,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
     if len(tok1) > 0:
         # decide next actions based on first token on the line
         tok1 = tok1.lower()
-        if tok1 in group_kw or tok1 in process_kw or tok1 in data_kw:
+        if tok1 in dsl.group_kw or tok1 in dsl.process_kw or tok1 in dsl.data_kw:
             # we expect an identifier and then maybe a colon, and nothing after a colon
             tokens.append(tok1)
             if error_assert(
@@ -151,7 +149,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                         start = index_of_next_non_space(line, pos3)
                         tok4 = line[start:]
                         tokens.append(tok4)
-        elif tok1 in id_list_kw:
+        elif tok1 in dsl.id_list_kw:
             # ID-LISTS, we expect a colon and optional one or more identifiers, separated by a comma if > 1 ident
             tokens.append(tok1)
             if error_assert(
@@ -164,7 +162,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                     tok3, pos3 = next_token(line, pos3)
                     if len(tok3) > 0:
                         tokens.append(tok3)
-        elif tok1 in str_list_kw:
+        elif tok1 in dsl.str_list_kw:
             # STR-LISTS, we expect a colon and (if there is anything after the colon) it is a single token
             tokens.append(tok1)
             if not error_check(
@@ -177,7 +175,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                     rest_of_line = line[pos2:].strip()
                     if len(rest_of_line) > 0:
                         tokens.append(rest_of_line)
-        elif tok1 in options_kw:
+        elif tok1 in dsl.options_kw:
             tokens.append(tok1)
             if not error_check(
                 pos < 0, f"A colon is expected after '{tok1}", line, line_no
@@ -186,10 +184,10 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                 if tok2 == ":":
                     tokens.append(tok2)
         elif (
-            tok1 in options_vars
-            or tok1 in group_vars
-            or tok1 in process_vars
-            or tok1 in data_vars
+            tok1 in dsl.options_vars
+            or tok1 in dsl.group_vars
+            or tok1 in dsl.process_vars
+            or tok1 in dsl.data_vars
         ):
             tokens.append(tok1)
             if not error_check(
@@ -216,7 +214,7 @@ def keywords_predicate(keywords):
     return lambda t: t in keywords
 
 
-def always_predicate(t):
+def always_predicate(_t):
     return True
 
 
@@ -256,9 +254,9 @@ def group_action(
 
 
 def options_action(
-    tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int
+    tokens: List[str], node, _context, lines: List[str], line_no: int, this_indent: int
 ):
-    # options takes place within a group -- often the implied top-level group.  It applies to all sub-groups
+    # options takes place within a group -- often the implied top-level group.  It applies to all subgroups
     #   where the settings are not overwritten (do I want that?)
 
     n_tokens = len(tokens)
@@ -330,14 +328,19 @@ def process_action(
         ):
             while identifier in node.processes:
                 identifier += "'"
+        if n_tokens > 4:
+            desc = tokens[4]
+        else:
+            desc = identifier
 
         new_process = Process(name=identifier, parent=node)
+        new_process.desc = desc
         node.processes[identifier] = new_process
         return parse_process(lines, new_process, context, line_no + 1, this_indent)
     return line_no + 1
 
 
-def find_or_create_data_object(context, identifier: str) -> DataObject:
+def find_or_create_data_object(context, identifier: str, desc: str) -> DataObject:
     if identifier in context.data_objects:
         return context.data_objects[identifier]
     cur_context = context
@@ -348,6 +351,7 @@ def find_or_create_data_object(context, identifier: str) -> DataObject:
 
     # create an "undefined" type identifier
     undefined_data = DataObject(kind="UNDEFINED", name=identifier)
+    undefined_data.desc = desc
     context.data_objects[identifier] = undefined_data
     return undefined_data
 
@@ -367,9 +371,9 @@ def id_list_action(
         list_name = tokens[1]
 
         # if a list was already defined, use it -- even though that is unexpected
-        if list_name in input_kw:
+        if list_name in dsl.input_kw:
             target_list = node.inputs
-        elif list_name in output_kw:
+        elif list_name in dsl.output_kw:
             target_list = node.outputs
         else:
             error_check(True, "Unknown id_list_type", lines[line_no], line_no)
@@ -380,24 +384,10 @@ def id_list_action(
         while t_idx < n_tokens:
             identifier_text = tokens[t_idx]
             assert len(identifier_text) > 0
-            if identifier_text[-1] == "+":
-                optional = False
-                stackable = True
-                identifier = identifier_text[:-1]
-            elif identifier_text[-1] == "*":
-                optional = True
-                stackable = True
-                identifier = identifier_text[:-1]
-            elif identifier_text[-1] == "?":
-                optional = True
-                stackable = False
-                identifier = identifier_text[:-1]
-            else:
-                identifier = identifier_text
-                optional = False
-                stackable = False
 
-            data_obj: DataObject = find_or_create_data_object(context, identifier)
+            identifier, desc, optional, stackable = decode_identifier_string(identifier_text)
+
+            data_obj: DataObject = find_or_create_data_object(context, identifier, desc)
             target_list.append(
                 DataIdentifier(name=identifier, identifier_id=data_obj.uid, optional=optional, stackable=stackable)
             )
@@ -432,13 +422,13 @@ def str_list_action(
         list_name = tokens[1]
 
         # if a list was already defined, use it -- even though that is unexpected
-        if list_name in notes_kw:
+        if list_name in dsl.notes_kw:
             target_list = node.notes
-        elif list_name in assumption_kw:
+        elif list_name in dsl.assumption_kw:
             target_list = node.assumptions
-        elif list_name in pre_cond_kw:
+        elif list_name in dsl.pre_cond_kw:
             target_list = node.preconditions
-        elif list_name in post_cond_kw:
+        elif list_name in dsl.post_cond_kw:
             target_list = node.postconditions
         # elif list_name in desc_kw:
         #     target_list = node.desc
@@ -453,8 +443,41 @@ def str_list_action(
     return line_no + 1
 
 
+def decode_identifier_string(id_string: str) -> tuple[str, str, bool, bool]:
+    first_paren = id_string.find("(")
+    last_paren = id_string.rfind(")")
+    if first_paren > 0 and last_paren > 0:
+        desc = id_string[(first_paren + 1):last_paren]
+        rest = id_string[:first_paren].strip()
+    else:
+        rest = id_string
+        desc = None
+
+    if rest[-1] == "+":
+        optional = False
+        stackable = True
+        identifier = rest[:-1]
+    elif rest[-1] == "*":
+        optional = True
+        stackable = True
+        identifier = rest[:-1]
+    elif rest[-1] == "?":
+        optional = True
+        stackable = False
+        identifier = rest[:-1]
+    else:
+        identifier = rest
+        optional = False
+        stackable = False
+
+    if desc is None:
+        desc = identifier
+
+    return identifier, desc, optional, stackable
+
+
 def identifiers_action(
-    tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int
+    tokens: List[str], node, context, lines: List[str], line_no: int, _this_indent: int
 ):
     # this line is with one or more identifiers
     n_tokens = len(tokens)
@@ -465,24 +488,9 @@ def identifiers_action(
         identifier_text = tokens[t_idx]
         assert len(identifier_text) > 0
 
-        if identifier_text[-1] == "+":
-            optional = False
-            stackable = True
-            identifier = identifier_text[:-1]
-        elif identifier_text[-1] == "*":
-            optional = True
-            stackable = True
-            identifier = identifier_text[:-1]
-        elif identifier_text[-1] == "?":
-            optional = True
-            stackable = False
-            identifier = identifier_text[:-1]
-        else:
-            identifier = identifier_text
-            optional = False
-            stackable = False
+        identifier, desc, optional, stackable = decode_identifier_string(identifier_text)
 
-        data_obj: DataObject = find_or_create_data_object(context, identifier)
+        data_obj: DataObject = find_or_create_data_object(context, identifier, desc)
         node.append(
             DataIdentifier(name=identifier, identifier_id=data_obj.uid, optional=optional, stackable=stackable)
         )
@@ -503,7 +511,7 @@ def identifiers_action(
 
 
 def unquoted_string_action(
-    tokens: List[str], node, _context, lines: List[str], line_no: int, this_indent: int
+    tokens: List[str], node, _context, lines: List[str], line_no: int, _this_indent: int
 ):
     # this line is a single unquoted string
     n_tokens = len(tokens)
@@ -666,26 +674,26 @@ def __parse_block(
 #   Parsing Rule Sets
 # ------------------------------------------------------
 group_rules = [
-    make_rule(predicate=keywords_predicate(group_kw), action=group_action),
-    make_rule(predicate=keywords_predicate(data_kw), action=data_action),
-    make_rule(predicate=keywords_predicate(process_kw), action=process_action),
-    make_rule(predicate=keywords_predicate(options_kw), action=options_action),
-    make_rule(predicate=keywords_predicate(group_vars), action=setting_action),
+    make_rule(predicate=keywords_predicate(dsl.group_kw), action=group_action),
+    make_rule(predicate=keywords_predicate(dsl.data_kw), action=data_action),
+    make_rule(predicate=keywords_predicate(dsl.process_kw), action=process_action),
+    make_rule(predicate=keywords_predicate(dsl.options_kw), action=options_action),
+    make_rule(predicate=keywords_predicate(dsl.group_vars), action=setting_action),
 ]
 
 options_rules = [
-    make_rule(predicate=keywords_predicate(options_vars), action=setting_action),
+    make_rule(predicate=keywords_predicate(dsl.options_vars), action=setting_action),
 ]
 
 process_rules = [
-    make_rule(predicate=keywords_predicate(id_list_kw), action=id_list_action),
-    make_rule(predicate=keywords_predicate(str_list_kw), action=str_list_action),
-    make_rule(predicate=keywords_predicate(process_vars), action=setting_action),
+    make_rule(predicate=keywords_predicate(dsl.id_list_kw), action=id_list_action),
+    make_rule(predicate=keywords_predicate(dsl.str_list_kw), action=str_list_action),
+    make_rule(predicate=keywords_predicate(dsl.process_vars), action=setting_action),
 ]
 
 data_rules = [
-    make_rule(predicate=keywords_predicate(str_list_kw), action=str_list_action),
-    make_rule(predicate=keywords_predicate(data_vars), action=setting_action),
+    make_rule(predicate=keywords_predicate(dsl.str_list_kw), action=str_list_action),
+    make_rule(predicate=keywords_predicate(dsl.data_vars), action=setting_action),
 ]
 
 id_list_rules = [

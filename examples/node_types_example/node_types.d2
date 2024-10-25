@@ -3,69 +3,69 @@ vars: {
      theme-id: 1
   }
 }
-D2: A
-D3: B
-D4: C
-D5: X
-D6: Y
-D7: D
-D8: E
-D9: F
-D10: G
-D11: H
-D12: I
-D13: J
-D14: K
-D15: L
-D16: M
-P17: Process 1
+D3: Config
+D4: Data Frame
+D5: Summary Stats
+D6: Data Partitions
+D8: Feature Importance
+D9: Data Clusters
+D10: Outlier List
+D12: Data Dictionary
+D13: I Data
+D14: J Data
+D16: K Data
+D18: L Data
+D19: M Data
+D21: Optional Output
+D23: Final Report
+P2: Process 1
+P2.shape: Hexagon
+P7: Process 2
+P7.shape: Hexagon
+P11: Process 3
+P11.shape: Hexagon
+P15: Process 4
+P15.shape: Hexagon
+P17: Process 5
 P17.shape: Hexagon
-P18: Process 2
-P18.shape: Hexagon
-P19: Process 3
-P19.shape: Hexagon
-P20: Process 4
+P17.style.multiple: true
+P20: Process 6
 P20.shape: Hexagon
-P21: Process 5
-P21.shape: Hexagon
-P21.style.multiple: true
-P22: Process 6
+P22: Process 7
 P22.shape: Hexagon
-P23: Process 7
-P23.shape: Hexagon
-D3 -> P17
-D4 -> P17
-P17 -> D7
-P17 -> D8
-D3 -> P18
-D4 -> P18
-P18 -> D9
-P18 -> D10
-P18 -> D11 {style: {stroke-dash: 3}}
-D2 -> P19
-D3 -> P19
-D4 -> P19
-P19 -> D12
-P19 -> D13 {style: {stroke-dash: 3}}
-D7 -> P20
-D9 -> P20
-P20 -> D14
-D8 -> P21
-D10 -> P21
-P21 -> D15
-P21 -> D16 {style: {stroke-dash: 3}}
-D16 -> P22 {style: {stroke-dash: 3}}
-D11 -> P22 {style: {stroke-dash: 3}}
-D13 -> P22 {style: {stroke-dash: 3}}
-P22 -> D6 {style: {stroke-dash: 3}}
-D14 -> P23
-D15 -> P23
-P23 -> D5
-D10.style.multiple: true
-D15.style.multiple: true
+D3 -> P2
+D4 -> P2
+P2 -> D5
+P2 -> D6
+D3 -> P7
+D4 -> P7
+P7 -> D8
+P7 -> D9
+P7 -> D10 {style: {stroke-dash: 3}}
+D12 -> P11
+D3 -> P11
+D4 -> P11
+P11 -> D13
+P11 -> D14 {style: {stroke-dash: 3}}
+D5 -> P15
+D8 -> P15
+P15 -> D16
+D6 -> P17
+D9 -> P17
+P17 -> D18
+P17 -> D19 {style: {stroke-dash: 3}}
+D19 -> P20 {style: {stroke-dash: 3}}
+D10 -> P20 {style: {stroke-dash: 3}}
+D14 -> P20 {style: {stroke-dash: 3}}
+P20 -> D21 {style: {stroke-dash: 3}}
+D16 -> P22
+D18 -> P22
+P22 -> D23
+D9.style.multiple: true
+D6.style.multiple: true
+D18.style.multiple: true
 D4.style.multiple: true
-D8.style.multiple: true
-D13.style.stroke-dash: 3
-D6.style.stroke-dash: 3
-D11.style.stroke-dash: 3
-D16.style.stroke-dash: 3
+D10.style.stroke-dash: 3
+D19.style.stroke-dash: 3
+D14.style.stroke-dash: 3
+D21.style.stroke-dash: 3

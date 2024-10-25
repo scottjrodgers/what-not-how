@@ -12,10 +12,13 @@ def generate_graph(fname: str):
     subprocess.run(['d2', f"{output_basename}.d2", f"{output_basename}.png"])
 
 
+# TASK: Add CLI interface
+
+
 if __name__ == "__main__":
-    model_file = 'examples/what_not_how/what_not_how.what'
+    # model_file = 'examples/what_not_how/what_not_how.what'
     # model_file = 'examples/optimizer_tool_sample/optimizer.what'
-    # model_file = 'examples/node_types_example/node_types.what'
+    model_file = 'examples/node_types_example/node_types.what'
     # model_file = 'examples/cookie_recipe/cookies.what'
     generate_graph(model_file)
 
