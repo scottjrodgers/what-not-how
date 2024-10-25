@@ -40,6 +40,7 @@ class Process (BaseModel):
     inputs: List['DataIdentifier'] = []
     outputs: List['DataIdentifier'] = []
     notes: List[str] = []
+    assumptions: List[str] = []
     pre_conditions: List[str] = []
     post_conditions: List[str] = []
     parent: Optional[ModelGroup] = None

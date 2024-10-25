@@ -14,5 +14,5 @@ repos:
     hooks:
     - id: ruff
       types_or: [ python, pyi ]
-      # args: [ --fix ]
+      args: [ --fix ]
     #- id: ruff-format

@@ -43,14 +43,16 @@ def _build(inputs, expected):
         _build("post-condition:", ["", "post-condition", ":"]),
         _build("Not a list: A, B, C", ["", "Not a list: A, B, C"]),
         _build("options:", ["", "options", ":"]),
-        _build("tool: mermaid", ["", "tool", ":", "mermaid"]),
         _build("title: Example A", ["", "title", ":", "Example A"]),
         _build("filename: exp-A", ["", "filename", ":", "exp-A"]),
-        _build("svg-name: output", ["", "svg-name", ":", "output"]),
+        _build("base-name: output", ["", "base-name", ":", "output"]),
         _build("recurse: true", ["", "recurse", ":", "true"]),
         _build("flatten: 2", ["", "flatten", ":", "2"]),
         _build("flatten: false", ["", "flatten", ":", "false"]),
         _build("implements: Pr-1", ["", "implements", ":", "Pr-1"]),
+        _build("in: A* 'A Name'", ["", "in", ":", "A* 'A Name'"]),
+        _build("in: A* 'A Name', B? 'Bee'", ["", "in", ":", "A* 'A Name'", ",", "B? 'Bee'"]),
+        _build("", [""]),
     ],
 )
 def test_smart_tokenize(input_text, expected):

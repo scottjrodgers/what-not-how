@@ -18,7 +18,8 @@ class DSL (BaseModel):
     group_vars: Set[str] = Field(default={"implements"}, frozen=True)
 
     options_kw: Set[str] = Field(default={"options"}, frozen=True)
-    options_vars: Set[str] = Field(default={"tool", "title", "filename", "svg-name", "recurse", "flatten"}, frozen=True)
+    options_vars: Set[str] = Field(default={"title", "filename", "base-name", "recurse", "flatten"}, frozen=True)
+    # removed "tool" keyword for now
 
     process_kw: Set[str] = Field(default={"process", "function", "procedure"}, frozen=True)
     process_vars: Set[str] = Field(default={"stackable"}, frozen=True)
@@ -46,12 +47,11 @@ dsl = DSL()
 # ------------------------------------------------------
 #   Error handling
 # ------------------------------------------------------
-class ErrorData:
-    def __init__(self, message, line, line_no, col_no):
-        self.message = message
-        self.line = line
-        self.line_no = line_no
-        self.col_no = col_no
+class ErrorData (BaseModel):
+    message: str = Field()
+    line: str = Field()
+    line_no: int = Field()
+    col_no: Optional[int] = Field()
 
 
 error_list: List[ErrorData] = []
@@ -64,7 +64,7 @@ def format_error(error: ErrorData) -> str:
 
 def error_check(condition, message, line, line_no, col_no=None):
     if condition:
-        error = ErrorData(message, line.strip(), line_no, col_no)
+        error = ErrorData(message=message, line=line.strip(), line_no=line_no, col_no=col_no)
         error_list.append(error)
         print(format_error(error))
     return condition
@@ -91,6 +91,19 @@ def index_of_next_space(line, start) -> int:
     return -1
 
 
+def index_of_next_comma(line, start) -> int:
+    if start < 0 or start >= len(line):
+        return -1
+    special_char = None
+    if line[start] in [","]:
+        special_char = line[start]
+    for i in range(start, len(line)):
+        if (not special_char) and line[i] in [","]:
+            return i
+        elif special_char and line[i] != special_char:
+            return i
+    return -1
+
 def index_of_next_non_space(line, start) -> int:
     for i in range(start, len(line)):
         if line[i] != " ":
@@ -98,11 +111,14 @@ def index_of_next_non_space(line, start) -> int:
     return -1
 
 
-def next_token(line, start):
+def next_token(line, start, comma_separated=False):
     if start < 0:
         return "", -1
     pos_1 = index_of_next_non_space(line, start)
-    pos_2 = index_of_next_space(line, pos_1)
+    if comma_separated:
+        pos_2 = index_of_next_comma(line, pos_1)
+    else:
+        pos_2 = index_of_next_space(line, pos_1)
     if pos_2 > 0:
         return line[pos_1:pos_2], pos_2
     return line[pos_1:], -1
@@ -159,7 +175,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                 tokens.append(colon)
                 pos3 = pos2
                 while pos3 >= 0:
-                    tok3, pos3 = next_token(line, pos3)
+                    tok3, pos3 = next_token(line, pos3, comma_separated=True)
                     if len(tok3) > 0:
                         tokens.append(tok3)
         elif tok1 in dsl.str_list_kw:

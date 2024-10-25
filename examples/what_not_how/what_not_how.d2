@@ -4,31 +4,29 @@ vars: {
   }
 }
 D3: WhatModelFile
-D4: DataFlowDiagram
-D5: [ErrorList]
-D7: ProcessObjects
-D8: DataObjects
-D9: ParseErrorList
-D11: HierarchicalSystemGraph
-D13: D2DiagramCode
-P2: WNH_AnalyzeModel
+D4: ProcessObjects
+D5: DataObjects
+D6: ParseErrorList
+D8: HierarchicalSystemGraph
+D10: D2DiagramCode
+D12: DataFlowDiagram
+P2: ParseWhatNotHowModelFile
 P2.shape: Hexagon
-P6: ParseWhatNotHowModelFile
-P6.shape: Hexagon
-P10: AssembleGraphs
-P10.shape: Hexagon
-P12: D2CodeFromSystemGraphs
-P12.shape: Hexagon
+P7: AssembleGraphs
+P7.shape: Hexagon
+P9: D2CodeFromSystemGraphs
+P9.shape: Hexagon
+P11: GenerateDataFlowSVG
+P11.shape: Hexagon
 D3 -> P2
 P2 -> D4
 P2 -> D5
-D3 -> P6
-P6 -> D7
-P6 -> D8
-P6 -> D9 {style: {stroke-dash: 3}}
-D7 -> P10
-D8 -> P10
-P10 -> D11
-D11 -> P12
-P12 -> D13
-D9.style.stroke-dash: 3
+P2 -> D6 {style: {stroke-dash: 3}}
+D4 -> P7
+D5 -> P7
+P7 -> D8
+D8 -> P9
+P9 -> D10
+D10 -> P11
+P11 -> D12
+D6.style.stroke-dash: 3
