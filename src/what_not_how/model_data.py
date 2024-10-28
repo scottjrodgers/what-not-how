@@ -60,7 +60,6 @@ class ModelOptions (BaseModel):
     tool: str = "d2"
     title: str = ""
     fname: str = "output"
-    svg_name: Optional[str] = None
     recurse: bool = True
     flatten: int = 0
 

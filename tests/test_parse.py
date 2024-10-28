@@ -52,6 +52,7 @@ def _build(inputs, expected):
         _build("implements: Pr-1", ["", "implements", ":", "Pr-1"]),
         _build("in: A* 'A Name'", ["", "in", ":", "A* 'A Name'"]),
         _build("in: A* 'A Name', B? 'Bee'", ["", "in", ":", "A* 'A Name'", ",", "B? 'Bee'"]),
+        _build("    A* 'A Name'", ["    ", "A* 'A Name'"]),
         _build("", [""]),
     ],
 )

@@ -20,7 +20,7 @@ def generate_graph(fname: str):
 
 
 if __name__ == "__main__":
-    diagram = 4
+    diagram = 5
 
     if diagram == 1 or diagram <= 0:
         model_file = 'examples/what_not_how/what_not_how.what'
@@ -36,6 +36,10 @@ if __name__ == "__main__":
 
     if diagram == 4 or diagram <= 0:
         model_file = 'examples/cookie_recipe/cookies.what'
+        generate_graph(model_file)
+
+    if diagram == 5 or diagram <= 0:
+        model_file = 'examples/hierarchy/hierarchy.what'
         generate_graph(model_file)
 
     print("Boom! done.")

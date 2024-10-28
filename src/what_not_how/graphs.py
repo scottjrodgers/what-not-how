@@ -40,12 +40,9 @@ from typing import List, Tuple
 
 def build_data_flow_graph(mdl: ModelGroup, output_basename: str, debug=False) -> None:
     # tool = get_options(mdl).tool
-    # proc_list, obj_list = preprocess_graph_nodes(mdl)
-    if mdl.options and mdl.options.tool == "mermaid":
-        assert False, "Not fully implemented"
-        # build_mermaid_graph(mdl)
-    else:
-        build_d2_graph(mdl, output_basename)
+    proc_list, obj_list = preprocess_graph_nodes(mdl)
+
+    build_d2_graph(mdl, output_basename)
 
 
 def get_options(mdl: ModelGroup) -> ModelOptions:
