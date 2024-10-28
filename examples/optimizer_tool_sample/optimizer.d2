@@ -3,34 +3,33 @@ vars: {
      theme-id: 1
   }
 }
-D2: Opt_MRD
 D3: Optimal_DV_Values
 D4: Constraint_Relaxation_Info
 D5: MIP_Error_List
 D6: Gurobi_Model
-D9: Objective_Function_Info
-D10: Variable_Definition_Info
-D11: Constraint_Info
-D13: Model-ID-List
-D14: KPI_by_Model_ID
-D15: KPI-Level-Weights
-P7: SolveGurobiModel
+D8: Objective_Function_Info
+D9: Variable_Definition_Info
+D10: Constraint_Info
+D12: Model-ID-List
+D13: KPI_by_Model_ID
+D14: KPI-Level-Weights
+P2: SolveGurobiModel
+P2.shape: Hexagon
+P7: BuildGurobiModel
 P7.shape: Hexagon
-P8: BuildGurobiModel
-P8.shape: Hexagon
-P12: BuildObjectiveFunction
-P12.shape: Hexagon
-D6 -> P7
-P7 -> D3
-P7 -> D4 {style: {stroke-dash: 3}}
-P7 -> D5 {style: {stroke-dash: 3}}
-D9 -> P8
-D10 -> P8
-D11 -> P8
-P8 -> D6
-D13 -> P12
-D14 -> P12
-D15 -> P12
-P12 -> D9
-D4.style.stroke-dash: 3
+P11: BuildObjectiveFunction
+P11.shape: Hexagon
+D6 -> P2
+P2 -> D3
+P2 -> D4 {style: {stroke-dash: 3}}
+P2 -> D5 {style: {stroke-dash: 3}}
+D8 -> P7
+D9 -> P7
+D10 -> P7
+P7 -> D6
+D12 -> P11
+D13 -> P11
+D14 -> P11
+P11 -> D8
 D5.style.stroke-dash: 3
+D4.style.stroke-dash: 3

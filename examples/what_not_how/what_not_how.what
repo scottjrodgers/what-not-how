@@ -2,43 +2,6 @@
 #  Exploration of the What-not-How system
 #
 
-# Top level
-#file WhatModelFile
-#file DataFlowDiagram
-#data ErrorList
-
-#process WNH_GenerateFlowDiagram:
-#    inputs:
-#        WhatModelFile
-#
-#    outputs:
-#        DataFlowDiagram
-#        [ErrorList]
-#
-#    notes:
-#        What's involved?
-#        1. read and parse the model file, and any additional included files
-#        2. report any errors
-#        3. build a dependency graph to assist with ordering of blocks
-#        4. generate D2 code fragments for the process blocks
-#        5. generate D2 code fragments for the file / data object blocks
-#        6. generate D2 code fragments for the connections
-#        7. consolidate D2 code and send to D2 CLI tool
-#        8. D2 CLI tool generates diagram
-
-
-process WNH_AnalyzeModel:
-    inputs:
-        WhatModelFile
-
-    outputs:
-        DataFlowDiagram
-        [ErrorList]
-
-
-#--------------------------
-#namespace Level-1:
-#--------------------------
 process ParseWhatNotHowModelFile:
     input: WhatModelFile
     outputs:
@@ -54,22 +17,22 @@ process AssembleGraphs:
         HierarchicalSystemGraph
 
     notes:
-        1. This system will need to resolve the same data objects being connected through different graphs
-           of processes depending on the degree to which we're zoomed in or out.
+        This system will need to resolve the same data objects being connected through different graphs
+        of processes depending on the degree to which we're zoomed in or out.
 
 process D2CodeFromSystemGraphs:
     input: HierarchicalSystemGraph
     output: D2DiagramCode
 
-process GenerateDataFlowSVG
+process GenerateDataFlowSVG:
     assumptions:
         Diagram will be produced using D2 CLI tool
 
     notes:
-        1. Need to detect if D2 CLI is installed and produce instructions for how to install it if it's not.
+        Need to detect if D2 CLI is installed and produce instructions for how to install it if it's not.
 
     inputs:
-        TemporaryDiagramCodeForD2
+        D2DiagramCode
 
     outputs:
         DataFlowDiagram

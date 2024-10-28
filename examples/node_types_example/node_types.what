@@ -1,8 +1,7 @@
 options:
-    tool: d2
     title: Node Types
     filename: node_types
-    svg-name: node_types
+    base-name: node_types
     recurse: true
     flatten: 0
 

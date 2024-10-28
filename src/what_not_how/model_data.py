@@ -40,6 +40,7 @@ class Process (BaseModel):
     inputs: List['DataIdentifier'] = []
     outputs: List['DataIdentifier'] = []
     notes: List[str] = []
+    assumptions: List[str] = []
     pre_conditions: List[str] = []
     post_conditions: List[str] = []
     parent: Optional[ModelGroup] = None
@@ -59,7 +60,6 @@ class ModelOptions (BaseModel):
     tool: str = "d2"
     title: str = ""
     fname: str = "output"
-    svg_name: Optional[str] = None
     recurse: bool = True
     flatten: int = 0
 

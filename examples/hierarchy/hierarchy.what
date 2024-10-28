@@ -1,0 +1,22 @@
+# Hierarchical process
+options:
+    recurse: true
+
+
+process block1: 'Process Block 1'
+    in:
+        Reqs 'Requirements'
+        Code 'Source Code'
+    out:
+        App 'Application'
+        Errs? 'Error List'
+
+
+details block1:
+    process PR: "Parse Requirements"
+        in: Reqs
+        out: Vars "Variables", Constr "Constraints"
+
+    process Opt: "Code Optimizer"
+        in: Vars, Constr, Code
+        out: App, Errs?

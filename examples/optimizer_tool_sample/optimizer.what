@@ -1,16 +1,4 @@
 #-----------------------------------------
-# Data Objects:
-#-----------------------------------------
-file Opt_MRD
-data Optimal_DV_Values
-data Constraint_Relaxation_Info
-data MIP_Error_List
-data Gurobi_Model:
-    notes:
-        Model object containing the objective function, variable definitions (types, bounds),
-        and constraints - including intermediate variables as necessary
-
-#-----------------------------------------
 # Process Definitions
 #-----------------------------------------
 process SolveGurobiModel:

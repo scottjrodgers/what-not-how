@@ -14,20 +14,25 @@ from what_not_how.model_data import (
 # ------------------------------------------------------
 class DSL (BaseModel):
 
-    group_kw: Set[str] = Field(default={"group", "detail", "details"}, frozen=True)
-    group_vars: Set[str] = Field(default={"implements"}, frozen=True)
+    group_kw: Set[str] = Field(default={"detail", "details"}, frozen=True)
+    group_vars: Set[str] = Field(default={}, frozen=True)
 
     options_kw: Set[str] = Field(default={"options"}, frozen=True)
-    options_vars: Set[str] = Field(default={"tool", "title", "filename", "svg-name", "recurse", "flatten"}, frozen=True)
+    options_vars: Set[str] = Field(default={"title", "filename", "base-name", "recurse", "flatten"}, frozen=True)
+    # removed "tool" keyword for now
 
     process_kw: Set[str] = Field(default={"process", "function", "procedure"}, frozen=True)
     process_vars: Set[str] = Field(default={"stackable"}, frozen=True)
+
     data_kw: Set[str] = Field(default={}, frozen=True)
     data_vars: Set[str] = Field(default={}, frozen=True)
+
     input_kw: Set[str] = Field(default={"in", "input", "inputs"}, frozen=True)
     output_kw: Set[str] = Field(default={"out", "output", "outputs"}, frozen=True)
+
     notes_kw: Set[str] = Field(default={"note", "notes"}, frozen=True)
     assumption_kw: Set[str] = Field(default={"assumptions"}, frozen=True)
+
     pre_cond_kw: Set[str] = Field(default={"pre-condition", "pre-conditions"}, frozen=True)
     post_cond_kw: Set[str] = Field(default={"post-condition", "post-conditions"}, frozen=True)
 
@@ -46,12 +51,11 @@ dsl = DSL()
 # ------------------------------------------------------
 #   Error handling
 # ------------------------------------------------------
-class ErrorData:
-    def __init__(self, message, line, line_no, col_no):
-        self.message = message
-        self.line = line
-        self.line_no = line_no
-        self.col_no = col_no
+class ErrorData (BaseModel):
+    message: str = Field()
+    line: str = Field()
+    line_no: int = Field()
+    col_no: Optional[int] = Field()
 
 
 error_list: List[ErrorData] = []
@@ -64,7 +68,7 @@ def format_error(error: ErrorData) -> str:
 
 def error_check(condition, message, line, line_no, col_no=None):
     if condition:
-        error = ErrorData(message, line.strip(), line_no, col_no)
+        error = ErrorData(message=message, line=line.strip(), line_no=line_no, col_no=col_no)
         error_list.append(error)
         print(format_error(error))
     return condition
@@ -91,6 +95,20 @@ def index_of_next_space(line, start) -> int:
     return -1
 
 
+def index_of_next_comma(line, start) -> int:
+    if start < 0 or start >= len(line):
+        return -1
+    special_char = None
+    if line[start] in [","]:
+        special_char = line[start]
+    for i in range(start, len(line)):
+        if (not special_char) and line[i] in [","]:
+            return i
+        elif special_char and line[i] != special_char:
+            return i
+    return -1
+
+
 def index_of_next_non_space(line, start) -> int:
     for i in range(start, len(line)):
         if line[i] != " ":
@@ -98,11 +116,14 @@ def index_of_next_non_space(line, start) -> int:
     return -1
 
 
-def next_token(line, start):
+def next_token(line, start, comma_separated=False):
     if start < 0:
         return "", -1
     pos_1 = index_of_next_non_space(line, start)
-    pos_2 = index_of_next_space(line, pos_1)
+    if comma_separated:
+        pos_2 = index_of_next_comma(line, pos_1)
+    else:
+        pos_2 = index_of_next_space(line, pos_1)
     if pos_2 > 0:
         return line[pos_1:pos_2], pos_2
     return line[pos_1:], -1
@@ -159,7 +180,7 @@ def smart_tokenize(line: str, line_no) -> List[str]:
                 tokens.append(colon)
                 pos3 = pos2
                 while pos3 >= 0:
-                    tok3, pos3 = next_token(line, pos3)
+                    tok3, pos3 = next_token(line, pos3, comma_separated=True)
                     if len(tok3) > 0:
                         tokens.append(tok3)
         elif tok1 in dsl.str_list_kw:
@@ -238,6 +259,7 @@ def group_action(
         line_no,
     ):
         identifier = tokens[2]
+        process_name = f"{identifier}"
         if error_check(
             identifier in node.groups,
             f"Group '{identifier}' is already defined in the current namespace.",
@@ -247,7 +269,7 @@ def group_action(
             while identifier in node.groups:
                 identifier += "'"
 
-        new_group = ModelGroup(name=identifier, parent=node)
+        new_group = ModelGroup(name=identifier, parent=node, implements=process_name)
         node.groups[identifier] = new_group
         return parse_group(lines, new_group, new_group, line_no + 1, this_indent)
     return line_no + 1
@@ -271,39 +293,6 @@ def options_action(
         # node remains the current active group
         node.options = new_options
         return parse_options(lines, new_options, node, line_no + 1, this_indent)
-    return line_no + 1
-
-
-def data_action(
-    tokens: List[str], node, context, lines: List[str], line_no: int, this_indent: int
-):
-    # this line is defining a new Data Object
-    n_tokens = len(tokens)
-    tok1 = tokens[1]
-    if error_assert(
-        n_tokens > 2,
-        f"A line starting with '{tok1}' should be followed by an identifier",
-        lines[line_no],
-        line_no,
-    ):
-        identifier = tokens[2]
-        if error_check(
-            identifier in node.data_objects and node.data_objects[identifier].kind != 'UNDEFINED',
-            f"Data object '{identifier}' is already defined in the current namespace.",
-            lines[line_no],
-            line_no,
-        ):
-            while identifier in node.data_objects:
-                identifier += "'"
-
-        if identifier not in node.data_objects:
-            new_data = DataObject(kind=tok1.upper(), name=identifier, parent=node)
-        else:
-            new_data = node.data_objects[identifier]
-            new_data.kind = tok1.upper()
-            new_data.parent = node
-        node.data_objects[identifier] = new_data
-        return parse_data(lines, new_data, context, line_no + 1, this_indent)
     return line_no + 1
 
 
@@ -444,11 +433,20 @@ def str_list_action(
 
 
 def decode_identifier_string(id_string: str) -> tuple[str, str, bool, bool]:
-    first_paren = id_string.find("(")
-    last_paren = id_string.rfind(")")
-    if first_paren > 0 and last_paren > 0:
-        desc = id_string[(first_paren + 1):last_paren]
-        rest = id_string[:first_paren].strip()
+    start_markers = ['"', "'", "("]
+    end_markers = ['"', "'", ")"]
+
+    first_marker_positions = [id_string.find(m) for m in start_markers]
+    last_marker_positions = [id_string.rfind(m) for m in end_markers]
+
+    first_marker = -1
+    for pos in first_marker_positions:
+        if first_marker < 0 or (0 < pos < first_marker):
+            first_marker = pos
+    last_marker = max(last_marker_positions)
+    if first_marker > 0 and last_marker > 0:
+        desc = id_string[(first_marker + 1):last_marker]
+        rest = id_string[:first_marker].strip()
     else:
         rest = id_string
         desc = None
@@ -551,8 +549,8 @@ def setting_action(
         node.title = value
     elif variable == "filename":
         node.fname = value
-    elif variable == "svg-name":
-        node.svg_name = value
+    elif variable == "base-name":
+        node.fname = value
     elif variable == "recurse":
         if error_assert(
             value in ["true", "false"],
@@ -675,7 +673,7 @@ def __parse_block(
 # ------------------------------------------------------
 group_rules = [
     make_rule(predicate=keywords_predicate(dsl.group_kw), action=group_action),
-    make_rule(predicate=keywords_predicate(dsl.data_kw), action=data_action),
+    # make_rule(predicate=keywords_predicate(dsl.data_kw), action=data_action),
     make_rule(predicate=keywords_predicate(dsl.process_kw), action=process_action),
     make_rule(predicate=keywords_predicate(dsl.options_kw), action=options_action),
     make_rule(predicate=keywords_predicate(dsl.group_vars), action=setting_action),
@@ -709,9 +707,7 @@ str_list_rules = [
 #   Specific parsing functions, implemented with the general parse_block function
 #   and specific rule sets for the different contexts
 # ---------------------------------------------------------------------------------
-def parse_group(
-    lines: List[str], node, context, start_line: int = 0, start_indent: int = -1
-):
+def parse_group(lines: List[str], node, context, start_line: int = 0, start_indent: int = -1):
     return __parse_block(lines, node, context, start_line, start_indent, group_rules)
 
 
