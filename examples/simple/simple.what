@@ -1,0 +1,7 @@
+process D:
+    in: A, B
+    out: E, F
+
+process D2:
+    in: C, E
+    out: G, H

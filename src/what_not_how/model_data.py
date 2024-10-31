@@ -2,7 +2,7 @@ from typing import Optional, Dict, List
 from pydantic import BaseModel, Field
 
 
-_next_unique_id: int = 1
+_next_unique_id: int = 0
 
 
 def get_uid() -> int:
@@ -13,7 +13,7 @@ def get_uid() -> int:
 
 
 class ModelGroup (BaseModel):
-    uid: int = Field(default_factory=get_uid)
+    # uid: int = Field(default_factory=get_uid)
     name: str
     processes: Dict[str, 'Process'] = {}
     data_objects: Dict[str, 'DataObject'] = {}
