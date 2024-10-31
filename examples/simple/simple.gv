@@ -1,0 +1,22 @@
+digraph G {
+  splines=true;
+  N1 [label="A"; shape=rect;]
+  N2 [label="B"; shape=rect;]
+  N3 [label="E"; shape=rect;]
+  N4 [label="F"; shape=rect;]
+  N6 [label="C"; shape=rect;]
+  N7 [label="G"; shape=rect;]
+  N8 [label="H"; shape=rect;]
+  N0 [label="D"; shape=hexagon;]
+  N1 -> N0
+  N2 -> N0
+  N0 -> N3
+  N0 -> N4
+  N5 [label="D2"; shape=hexagon;]
+  N6 -> N5
+  N3 -> N5
+  N5 -> N7
+  N5 -> N8
+  {rank=min; N1, N2, N6}
+  {rank=max; N4, N7, N8}
+}

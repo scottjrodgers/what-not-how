@@ -1,0 +1,52 @@
+vars: {
+  d2-config: {
+     theme-id: 1
+  }
+}
+D3: Requirements
+D4: Source Code
+D5: App File
+D6: Error List
+block1: {
+    label: Process Block 1
+    A1: "" {
+        shape: Circle
+        width: 20
+        height: 20
+    }
+    A2: "" {
+        shape: Circle
+        width: 20
+        height: 20
+    }
+    P2: Parse Requirements
+    P2.shape: Hexagon
+    D8: Vars
+    D9: Constraints
+    P3: Optimize Code
+    P3.shape: Hexagon
+    A1 -> P2
+    A2 -> P3
+    P2 -> D8
+    P2 -> D9
+    D8 -> P3
+    D9 -> P3
+    O1: "" {
+        shape: Circle
+        width: 20
+        height: 20
+    }
+    O2: "" {
+        shape: Circle
+        width: 20
+        height: 20
+    }
+    P3 -> O1
+    P3 -> O2
+}
+
+D3 -> block1.A1
+D4 -> block1.A2
+block1.O1 -> D5
+block1.O2 -> D6 {style: {stroke-dash: 3}}
+D6.style.stroke-dash: 3

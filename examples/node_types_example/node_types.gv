@@ -1,0 +1,52 @@
+digraph G {
+  D3 [label="Config"; shape=rect;]
+  D4 [label="Data Frame"; shape=rect;]
+  D5 [label="Summary Stats"; shape=rect;]
+  D6 [label="Data Partitions"; shape=rect;]
+  D8 [label="Feature Importance"; shape=rect;]
+  D9 [label="Data Clusters"; shape=rect;]
+  D10 [label="Outlier List"; shape=rect;]
+  D12 [label="Data Dictionary"; shape=rect;]
+  D13 [label="I Data"; shape=rect;]
+  D14 [label="J Data"; shape=rect;]
+  D16 [label="K Data"; shape=rect;]
+  D18 [label="L Data"; shape=rect;]
+  D19 [label="M Data"; shape=rect;]
+  D21 [label="Optional Output"; shape=rect;]
+  D23 [label="Final Report"; shape=rect;]
+  D2 [label="Process 1"; shape=hexagon;]
+  D3 -> D2
+  D4 -> D2
+  D2 -> D5
+  D2 -> D6
+  D7 [label="Process 2"; shape=hexagon;]
+  D3 -> D7
+  D4 -> D7
+  D7 -> D8
+  D7 -> D9
+  D7 -> D10
+  D11 [label="Process 3"; shape=hexagon;]
+  D12 -> D11
+  D3 -> D11
+  D4 -> D11
+  D11 -> D13
+  D11 -> D14
+  D15 [label="Process 4"; shape=hexagon;]
+  D5 -> D15
+  D8 -> D15
+  D15 -> D16
+  D17 [label="Process 5"; shape=hexagon;]
+  D6 -> D17
+  D9 -> D17
+  D17 -> D18
+  D17 -> D19
+  D20 [label="Process 6"; shape=hexagon;]
+  D19 -> D20
+  D10 -> D20
+  D14 -> D20
+  D20 -> D21
+  D22 [label="Process 7"; shape=hexagon;]
+  D16 -> D22
+  D18 -> D22
+  D22 -> D23
+}
