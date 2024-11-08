@@ -1,0 +1,7 @@
+digraph G {
+    // newlines in labels are okay.  I need to figure out where to break though
+    A [label="alphabetical sorting\nalgorithm version 1"; shape=rect]
+    // peripheries=2 or more gives a double border
+    B [label="beta"; shape=hexagon; peripheries=2]
+    A -> B
+}
