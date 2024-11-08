@@ -9,7 +9,6 @@
 - I view this as being a hierarchical data flow diagram where a single process node at one level might require an entire data flow diagram of its own to explain what goes on within that process
 
 ## My thoughts behind the title "What, not How."
-- TODO: print out or email myself the comments I sent to Graham on requirements gathering
 - My thinking on what vs. how.  And "why"
 - That the what for one level might be the "how" w.r.t a higher level diagram's process step.
 - The primary intent of this DSL and tooling is provide a tool and perhaps some recommended practices to focus on the part that's most important to get right as early as possible -- what the system or process must do, or provide, or produce.  And make it easy and safe to ignore, for now, the implementation details.

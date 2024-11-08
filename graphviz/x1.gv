@@ -1,0 +1,15 @@
+digraph G {
+    subgraph cluster_G1 {
+        label=G1
+        labeljust=l
+        A -> D
+        B -> D
+        D -> F
+        D -> E
+        C -> E
+        E -> G
+        E -> H
+        {rank = min; A B C}
+        {rank = max; F G H}
+    }
+}
